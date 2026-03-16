@@ -1,6 +1,11 @@
 import { World } from './ecs.js';
-import { Components, createPosition, createVelocity, createRenderable, createPlayerControl } from './components.js';
-import { MovementSystem, PlayerControlSystem, RenderSystem } from './systems.js';
+import { Position, createPosition } from './components/Position.js';
+import { Velocity, createVelocity } from './components/Velocity.js';
+import { Renderable, createRenderable } from './components/Renderable.js';
+import { PlayerControl, createPlayerControl } from './components/PlayerControl.js';
+import { MovementSystem } from './systems/MovementSystem.js';
+import { PlayerControlSystem } from './systems/PlayerControlSystem.js';
+import { RenderSystem } from './systems/RenderSystem.js';
 
 const world = new World();
 
@@ -11,10 +16,10 @@ world.addSystem(new RenderSystem());
 
 // Create Player Entity
 const player = world.createEntity();
-world.addComponent(player, Components.Position, createPosition(window.innerWidth / 2, window.innerHeight / 2));
-world.addComponent(player, Components.Velocity, createVelocity(0, 0));
-world.addComponent(player, Components.Renderable, createRenderable(40, 40, '#00ffcc')); // Cyan player
-world.addComponent(player, Components.PlayerControl, createPlayerControl(300)); // 300px per second
+world.addComponent(player, Position, createPosition(window.innerWidth / 2, window.innerHeight / 2));
+world.addComponent(player, Velocity, createVelocity(0, 0));
+world.addComponent(player, Renderable, createRenderable(40, 40, '#00ffcc')); // Cyan player
+world.addComponent(player, PlayerControl, createPlayerControl(300)); // 300px per second
 
 // Create Bouncing Entities
 const numBouncers = 20;
@@ -34,9 +39,9 @@ for (let i = 0; i < numBouncers; i++) {
     const color = colors[Math.floor(Math.random() * colors.length)];
     const size = 20 + Math.random() * 20;
 
-    world.addComponent(bouncer, Components.Position, createPosition(x, y));
-    world.addComponent(bouncer, Components.Velocity, createVelocity(dx, dy));
-    world.addComponent(bouncer, Components.Renderable, createRenderable(size, size, color));
+    world.addComponent(bouncer, Position, createPosition(x, y));
+    world.addComponent(bouncer, Velocity, createVelocity(dx, dy));
+    world.addComponent(bouncer, Renderable, createRenderable(size, size, color));
 }
 
 // Game Loop
