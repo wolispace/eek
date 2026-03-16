@@ -21,16 +21,16 @@ export class MovementSystem extends System {
                 if (pos.x < 0) {
                     pos.x = 0;
                     vel.dx *= -1;
-                } else if (pos.x + renderable.width > window.innerWidth) {
-                    pos.x = window.innerWidth - renderable.width;
+                } else if (pos.x + renderable.width > world.width) {
+                    pos.x = world.width - renderable.width;
                     vel.dx *= -1;
                 }
 
                 if (pos.y < 0) {
                     pos.y = 0;
                     vel.dy *= -1;
-                } else if (pos.y + renderable.height > window.innerHeight) {
-                    pos.y = window.innerHeight - renderable.height;
+                } else if (pos.y + renderable.height > world.height) {
+                    pos.y = world.height - renderable.height;
                     vel.dy *= -1;
                 }
             }

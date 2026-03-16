@@ -3,32 +3,38 @@ import { Position, createPosition } from './components/Position.js';
 import { Velocity, createVelocity } from './components/Velocity.js';
 import { Renderable, createRenderable } from './components/Renderable.js';
 import { PlayerControl, createPlayerControl } from './components/PlayerControl.js';
+import { CameraFocus, createCameraFocus } from './components/CameraFocus.js';
 import { MovementSystem } from './systems/MovementSystem.js';
 import { PlayerControlSystem } from './systems/PlayerControlSystem.js';
+import { CameraSystem } from './systems/CameraSystem.js';
 import { RenderSystem } from './systems/RenderSystem.js';
 
-const world = new World();
+const worldX = 5000;
+const worldY = 5000;
+const world = new World(worldX, worldY);
 
-// Add systems (Order matters: Input -> Logic -> Render)
+// Add systems (Order matters: Input -> Logic -> Camera -> Render)
 world.addSystem(new PlayerControlSystem());
 world.addSystem(new MovementSystem());
+world.addSystem(new CameraSystem());
 world.addSystem(new RenderSystem());
 
 // Create Player Entity
 const player = world.createEntity();
 world.addComponent(player, Position, createPosition(window.innerWidth / 2, window.innerHeight / 2));
 world.addComponent(player, Velocity, createVelocity(0, 0));
-world.addComponent(player, Renderable, createRenderable(40, 40, '#00ffcc')); // Cyan player
+world.addComponent(player, Renderable, createRenderable(40, 40, 'blue')); // Cyan player
 world.addComponent(player, PlayerControl, createPlayerControl(300)); // 300px per second
+world.addComponent(player, CameraFocus, createCameraFocus());
 
 // Create Bouncing Entities
-const numBouncers = 20;
+const numBouncers = 5000;
 const colors = ['#ff3366', '#ff9933', '#cc33ff', '#33ccff', '#ffeb3b'];
 
 for (let i = 0; i < numBouncers; i++) {
     const bouncer = world.createEntity();
-    const x = Math.random() * (window.innerWidth - 30);
-    const y = Math.random() * (window.innerHeight - 30);
+    const x = Math.random() * (worldX - 30);
+    const y = Math.random() * (worldY - 30);
 
     // Random direction and speed
     const angle = Math.random() * Math.PI * 2;

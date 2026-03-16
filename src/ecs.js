@@ -1,5 +1,10 @@
 export class World {
-    constructor() {
+    constructor(width = 5000, height = 5000) {
+        this.width = width;
+        this.height = height;
+        this.cameraX = 0;
+        this.cameraY = 0;
+        
         this.nextEntityId = 1;
         this.entities = new Set();
         // Maps component name -> Map(entityId -> componentData)

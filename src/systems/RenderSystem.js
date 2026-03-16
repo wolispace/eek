@@ -27,8 +27,22 @@ export class RenderSystem extends System {
             const pos = world.getComponent(entity, Position);
             const renderable = world.getComponent(entity, Renderable);
 
+            // Apply camera offset
+            const drawX = pos.x - world.cameraX;
+            const drawY = pos.y - world.cameraY;
+
+            // Frustum Culling: skip drawing if entirely outside viewport
+            if (
+                drawX + renderable.width < 0 || 
+                drawX > this.canvas.width ||
+                drawY + renderable.height < 0 ||
+                drawY > this.canvas.height
+            ) {
+                continue;
+            }
+
             this.ctx.fillStyle = renderable.color;
-            this.ctx.fillRect(pos.x, pos.y, renderable.width, renderable.height);
+            this.ctx.fillRect(drawX, drawY, renderable.width, renderable.height);
         }
     }
 }
