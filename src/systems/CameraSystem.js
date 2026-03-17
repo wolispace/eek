@@ -41,9 +41,11 @@ export class CameraSystem extends System {
             world.cameraY += (screenY - (window.innerHeight - this.edgeThreshold));
         }
 
-        // Clamp camera to world bounds
-        // Assuming we want to stop camera at the actual edges
-        world.cameraX = Math.max(0, Math.min(world.cameraX, world.width - window.innerWidth));
-        world.cameraY = Math.max(0, Math.min(world.cameraY, world.height - window.innerHeight));
+        // Clamp camera to world bounds (accounting for zoom)
+        const zoom = world.cameraZoom;
+        const visW = window.innerWidth  / zoom;
+        const visH = window.innerHeight / zoom;
+        world.cameraX = Math.max(0, Math.min(world.cameraX, world.width  - visW));
+        world.cameraY = Math.max(0, Math.min(world.cameraY, world.height - visH));
     }
 }

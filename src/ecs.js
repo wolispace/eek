@@ -4,6 +4,11 @@ export class World {
         this.height = height;
         this.cameraX = 0;
         this.cameraY = 0;
+        this.cameraZoom = 1;
+
+        // Zoom bounds: out as far as the whole world fits; in up to 4×
+        this.minZoom = Math.min(window.innerWidth / width, window.innerHeight / height);
+        this.maxZoom = 4;
         
         this.nextEntityId = 1;
         this.entities = new Set();
