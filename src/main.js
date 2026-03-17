@@ -4,18 +4,21 @@ import { Velocity, createVelocity } from './components/Velocity.js';
 import { Renderable, createRenderable } from './components/Renderable.js';
 import { PlayerControl, createPlayerControl } from './components/PlayerControl.js';
 import { CameraFocus, createCameraFocus } from './components/CameraFocus.js';
+import { Collidable, createCollidable } from './components/Collidable.js';
 import { MovementSystem } from './systems/MovementSystem.js';
 import { PlayerControlSystem } from './systems/PlayerControlSystem.js';
 import { CameraSystem } from './systems/CameraSystem.js';
 import { RenderSystem } from './systems/RenderSystem.js';
+import { CollisionSystem } from './systems/CollisionSystem.js';
 
 const worldX = 5000;
 const worldY = 5000;
 const world = new World(worldX, worldY);
 
-// Add systems (Order matters: Input -> Logic -> Camera -> Render)
+// Add systems (Order matters: Input -> Logic -> Collision -> Camera -> Render)
 world.addSystem(new PlayerControlSystem());
 world.addSystem(new MovementSystem());
+world.addSystem(new CollisionSystem());
 world.addSystem(new CameraSystem());
 world.addSystem(new RenderSystem());
 
@@ -26,9 +29,10 @@ world.addComponent(player, Velocity, createVelocity(0, 0));
 world.addComponent(player, Renderable, createRenderable(40, 40, 'blue')); // Cyan player
 world.addComponent(player, PlayerControl, createPlayerControl(300)); // 300px per second
 world.addComponent(player, CameraFocus, createCameraFocus());
+world.addComponent(player, Collidable, createCollidable());
 
 // Create Bouncing Entities
-const numBouncers = 5000;
+const numBouncers = 1000;
 const colors = ['#ff3366', '#ff9933', '#cc33ff', '#33ccff', '#ffeb3b'];
 
 for (let i = 0; i < numBouncers; i++) {
@@ -48,6 +52,7 @@ for (let i = 0; i < numBouncers; i++) {
     world.addComponent(bouncer, Position, createPosition(x, y));
     world.addComponent(bouncer, Velocity, createVelocity(dx, dy));
     world.addComponent(bouncer, Renderable, createRenderable(size, size, color));
+    world.addComponent(bouncer, Collidable, createCollidable());
 }
 
 // Game Loop
