@@ -14,6 +14,7 @@ import { CollisionSystem } from './systems/CollisionSystem.js';
 const worldX = 5000;
 const worldY = 5000;
 const world = new World(worldX, worldY);
+console.log(world);
 
 // Add systems (Order matters: Input -> Logic -> Collision -> Camera -> Render)
 world.addSystem(new PlayerControlSystem());
@@ -55,6 +56,11 @@ for (let i = 0; i < numBouncers; i++) {
     world.addComponent(bouncer, Collidable, createCollidable());
 }
 
+// FPS overlay
+const fpsEl = document.getElementById('fps');
+let fpsFrames = 0;
+let fpsElapsed = 0;
+
 // Game Loop
 let lastTime = performance.now();
 
@@ -67,6 +73,15 @@ function gameLoop(currentTime) {
     const safeDelta = Math.min(deltaTime, 0.1);
 
     world.update(safeDelta);
+
+    // FPS counter
+    fpsFrames++;
+    fpsElapsed += deltaTime;
+    if (fpsElapsed >= 1) {
+        fpsEl.textContent = `FPS: ${fpsFrames}`;
+        fpsFrames = 0;
+        fpsElapsed -= 1;
+    }
 
     requestAnimationFrame(gameLoop);
 }

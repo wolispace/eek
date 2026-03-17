@@ -17,3 +17,16 @@ canvas {
     width: 100vw;
     height: 100vh;
 }
+#fps {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    color: #a6e3a1;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+    pointer-events: none;
+    z-index: 999;
+}
