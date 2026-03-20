@@ -14,7 +14,6 @@ import { CollisionSystem } from './systems/CollisionSystem.js';
 const worldX = 5000;
 const worldY = 5000;
 const world = new World(worldX, worldY);
-console.log(world);
 
 // Add systems (Order matters: Input -> Logic -> Collision -> Camera -> Render)
 world.addSystem(new PlayerControlSystem());
@@ -33,28 +32,40 @@ world.addComponent(player, CameraFocus, createCameraFocus());
 world.addComponent(player, Collidable, createCollidable());
 
 // Create Bouncing Entities
-const numBouncers = 1000;
 const colors = ['#ff3366', '#ff9933', '#cc33ff', '#33ccff', '#ffeb3b'];
+const bouncerIds = [];
 
-for (let i = 0; i < numBouncers; i++) {
+function spawnBouncer() {
     const bouncer = world.createEntity();
     const x = Math.random() * (worldX - 30);
     const y = Math.random() * (worldY - 30);
-
-    // Random direction and speed
     const angle = Math.random() * Math.PI * 2;
-    const speed = 100 + Math.random() * 150; // 100-250px per second
+    const speed = 100 + Math.random() * 150;
     const dx = Math.cos(angle) * speed;
     const dy = Math.sin(angle) * speed;
-
     const color = colors[Math.floor(Math.random() * colors.length)];
     const size = 20 + Math.random() * 20;
-
     world.addComponent(bouncer, Position, createPosition(x, y));
     world.addComponent(bouncer, Velocity, createVelocity(dx, dy));
     world.addComponent(bouncer, Renderable, createRenderable(size, size, color));
     world.addComponent(bouncer, Collidable, createCollidable());
+    bouncerIds.push(bouncer);
 }
+
+const numBouncers = 1000;
+for (let i = 0; i < numBouncers; i++) spawnBouncer();
+
+// +/- key controls
+window.addEventListener('keydown', (e) => {
+    if (e.key === '+' || e.key === '=') {
+        for (let i = 0; i < 100; i++) spawnBouncer();
+    } else if (e.key === '-') {
+        const toRemove = Math.min(100, bouncerIds.length);
+        for (let i = 0; i < toRemove; i++) {
+            world.destroyEntity(bouncerIds.pop());
+        }
+    }
+});
 
 // FPS overlay
 const fpsEl = document.getElementById('fps');
@@ -78,7 +89,7 @@ function gameLoop(currentTime) {
     fpsFrames++;
     fpsElapsed += deltaTime;
     if (fpsElapsed >= 1) {
-        fpsEl.textContent = `FPS: ${fpsFrames}`;
+        fpsEl.textContent = `FPS: ${fpsFrames}  |  Entities: ${bouncerIds.length}`;
         fpsFrames = 0;
         fpsElapsed -= 1;
     }

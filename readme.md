@@ -9,6 +9,13 @@ https://wolispace.com/eek/
 - Zoom
 - Frustum culling
 - Collision detection
-- FPS overlay
+- FPS overlay with live entity count
+- Dynamic entity spawning (+/- keys)
 
-
+## Controls
+| Key | Action |
+|-----|--------|
+| `W A S D` | Move player |
+| Scroll wheel | Zoom in / out |
+| `+` / `=` | Spawn 100 bouncers |
+| `-` | Remove 100 bouncers |
