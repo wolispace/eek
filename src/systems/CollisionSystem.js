@@ -7,94 +7,112 @@ import { SpatialHashGrid } from '../utils/SpatialHashGrid.js';
 
 export class CollisionSystem extends System {
     init(world) {
-        // Divide world into 100x100 pixel cells. 
+        // Divide world into 100x100 pixel cells.
         // 5000 / 100 = 50 cells across and down
         this.grid = new SpatialHashGrid(
-            [[0, 0], [world.width, world.height]], 
+            [[0, 0], [world.width, world.height]],
             [Math.ceil(world.width / 100), Math.ceil(world.height / 100)]
         );
     }
 
     update(world, deltaTime) {
         this.grid.clear();
-        const entities = world.query(Position, Renderable, Velocity, Collidable);
-        
+
+        // Moving entities (have Velocity)
+        const movers = world.query(Position, Renderable, Velocity, Collidable);
+        // Static entities: have Collidable but NO Velocity
+        const statics = world.query(Position, Renderable, Collidable).filter(
+            e => !world.getComponent(e, Velocity)
+        );
+
         // 1. Insert all collidable entities into the spatial hash grid
-        for (let i = 0; i < entities.length; i++) {
-            const entity = entities[i];
-            const pos = world.getComponent(entity, Position);
-            const renderable = world.getComponent(entity, Renderable);
-            
-            this.grid.insert(entity, pos.x, pos.y, renderable.width, renderable.height);
+        for (let i = 0; i < movers.length; i++) {
+            const e = movers[i];
+            const pos = world.getComponent(e, Position);
+            const ren = world.getComponent(e, Renderable);
+            this.grid.insert(e, pos.x, pos.y, ren.width, ren.height);
         }
+        for (let i = 0; i < statics.length; i++) {
+            const e = statics[i];
+            const pos = world.getComponent(e, Position);
+            const ren = world.getComponent(e, Renderable);
+            this.grid.insert(e, pos.x, pos.y, ren.width, ren.height);
+        }
+
+        // Build a Set for fast static lookup
+        const staticSet = new Set(statics);
 
         // Reusable array to prevent allocation per frame/entity
         if (!this.nearbyBuffer) this.nearbyBuffer = [];
 
-        // 2. Query grid for potential collisions and resolve
-        for (let i = 0; i < entities.length; i++) {
-            const entity = entities[i];
+        // 2. For each mover, check nearby entities
+        for (let i = 0; i < movers.length; i++) {
+            const entity = movers[i];
             const pos1 = world.getComponent(entity, Position);
             const vel1 = world.getComponent(entity, Velocity);
-            const render1 = world.getComponent(entity, Renderable);
-            
-            // Get nearby entities into our buffer
-            this.grid.findNear(pos1.x, pos1.y, render1.width, render1.height, this.nearbyBuffer);
+            const ren1 = world.getComponent(entity, Renderable);
+
+            this.grid.findNear(pos1.x, pos1.y, ren1.width, ren1.height, this.nearbyBuffer);
 
             for (let j = 0; j < this.nearbyBuffer.length; j++) {
                 const other = this.nearbyBuffer[j];
+                const isOtherStatic = staticSet.has(other);
 
-                // Only evaluate each pair once! 
-                // Because each pair is composed of two distinct integer IDs, 
-                // processing only when entity < other guarantees exactly one check.
-                if (entity >= other) continue;
+                // For mover-vs-mover: only evaluate each pair once
+                if (!isOtherStatic && entity >= other) continue;
 
                 const pos2 = world.getComponent(other, Position);
-                const vel2 = world.getComponent(other, Velocity);
-                const render2 = world.getComponent(other, Renderable);
+                const ren2 = world.getComponent(other, Renderable);
 
-                // Simple AABB overlap check
+                // AABB overlap check
                 if (
-                    pos1.x < pos2.x + render2.width &&
-                    pos1.x + render1.width > pos2.x &&
-                    pos1.y < pos2.y + render2.height &&
-                    pos1.y + render1.height > pos2.y
+                    pos1.x < pos2.x + ren2.width &&
+                    pos1.x + ren1.width > pos2.x &&
+                    pos1.y < pos2.y + ren2.height &&
+                    pos1.y + ren1.height > pos2.y
                 ) {
-                    // Very simple bouncy elastic collision approximation: 
-                    // To prevent sticking, separate them slightly, then swap velocities.
-                    
-                    // Finding the axis of least penetration
-                    const overlapLeft = (pos1.x + render1.width) - pos2.x;
-                    const overlapRight = (pos2.x + render2.width) - pos1.x;
-                    const overlapTop = (pos1.y + render1.height) - pos2.y;
-                    const overlapBottom = (pos2.y + render2.height) - pos1.y;
+                    const overlapLeft   = (pos1.x + ren1.width)  - pos2.x;
+                    const overlapRight  = (pos2.x + ren2.width)  - pos1.x;
+                    const overlapTop    = (pos1.y + ren1.height) - pos2.y;
+                    const overlapBottom = (pos2.y + ren2.height) - pos1.y;
 
-                    const minOverlap = Math.min(Math.abs(overlapLeft), Math.abs(overlapRight), Math.abs(overlapTop), Math.abs(overlapBottom));
+                    const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
 
-                    if (minOverlap === Math.abs(overlapLeft)) {
-                        pos1.x -= minOverlap / 2;
-                        pos2.x += minOverlap / 2;
-                        let tempDx = vel1.dx;
-                        vel1.dx = vel2.dx;
-                        vel2.dx = tempDx;
-                    } else if (minOverlap === Math.abs(overlapRight)) {
-                        pos1.x += minOverlap / 2;
-                        pos2.x -= minOverlap / 2;
-                        let tempDx = vel1.dx;
-                        vel1.dx = vel2.dx;
-                        vel2.dx = tempDx;
-                    } else if (minOverlap === Math.abs(overlapTop)) {
-                        pos1.y -= minOverlap / 2;
-                        pos2.y += minOverlap / 2;
-                        let tempDy = vel1.dy;
-                        vel1.dy = vel2.dy;
-                        vel2.dy = tempDy;
-                    } else if (minOverlap === Math.abs(overlapBottom)) {
-                        pos1.y += minOverlap / 2;
-                        pos2.y -= minOverlap / 2;
-                        let tempDy = vel1.dy;
-                        vel1.dy = vel2.dy;
-                        vel2.dy = tempDy;
+                    if (isOtherStatic) {
+                        // Only push the mover back; reflect its velocity
+                        if (minOverlap === overlapLeft) {
+                            pos1.x -= overlapLeft;
+                            vel1.dx = -Math.abs(vel1.dx);
+                        } else if (minOverlap === overlapRight) {
+                            pos1.x += overlapRight;
+                            vel1.dx = Math.abs(vel1.dx);
+                        } else if (minOverlap === overlapTop) {
+                            pos1.y -= overlapTop;
+                            vel1.dy = -Math.abs(vel1.dy);
+                        } else {
+                            pos1.y += overlapBottom;
+                            vel1.dy = Math.abs(vel1.dy);
+                        }
+                    } else {
+                        // Mover vs mover: split separation and swap velocities
+                        const vel2 = world.getComponent(other, Velocity);
+                        if (minOverlap === overlapLeft) {
+                            pos1.x -= minOverlap / 2;
+                            pos2.x += minOverlap / 2;
+                            let tmp = vel1.dx; vel1.dx = vel2.dx; vel2.dx = tmp;
+                        } else if (minOverlap === overlapRight) {
+                            pos1.x += minOverlap / 2;
+                            pos2.x -= minOverlap / 2;
+                            let tmp = vel1.dx; vel1.dx = vel2.dx; vel2.dx = tmp;
+                        } else if (minOverlap === overlapTop) {
+                            pos1.y -= minOverlap / 2;
+                            pos2.y += minOverlap / 2;
+                            let tmp = vel1.dy; vel1.dy = vel2.dy; vel2.dy = tmp;
+                        } else {
+                            pos1.y += minOverlap / 2;
+                            pos2.y -= minOverlap / 2;
+                            let tmp = vel1.dy; vel1.dy = vel2.dy; vel2.dy = tmp;
+                        }
                     }
                 }
             }

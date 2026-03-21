@@ -33,6 +33,7 @@ world.addComponent(player, Collidable, createCollidable());
 
 // Create Bouncing Entities
 const colors = ['#ff3366', '#ff9933', '#cc33ff', '#33ccff', '#ffeb3b'];
+const staticColors = ['#4ade80', '#f87171', '#60a5fa', '#facc15', '#a78bfa', '#fb923c', '#34d399', '#f472b6'];
 const bouncerIds = [];
 
 function spawnBouncer() {
@@ -52,8 +53,22 @@ function spawnBouncer() {
     bouncerIds.push(bouncer);
 }
 
+function spawnStatic() {
+    const entity = world.createEntity();
+    const x = Math.random() * worldX;
+    const y = Math.random() * worldY;
+    const color = staticColors[Math.floor(Math.random() * staticColors.length)];
+    const size = 15 + Math.random() * 45;
+    world.addComponent(entity, Position, createPosition(x, y));
+    world.addComponent(entity, Renderable, createRenderable(size, size, color));
+    world.addComponent(entity, Collidable, createCollidable());
+}
+
 const numBouncers = 1000;
 for (let i = 0; i < numBouncers; i++) spawnBouncer();
+
+const numStatics = 300;
+for (let i = 0; i < numStatics; i++) spawnStatic();
 
 // +/- key controls
 window.addEventListener('keydown', (e) => {
