@@ -11,8 +11,8 @@ import { CameraSystem } from './systems/CameraSystem.js';
 import { RenderSystem } from './systems/RenderSystem.js';
 import { CollisionSystem } from './systems/CollisionSystem.js';
 
-const worldX = 5000;
-const worldY = 5000;
+const worldX = 10000;
+const worldY = 10000;
 const world = new World(worldX, worldY);
 
 // Add systems (Order matters: Input -> Logic -> Collision -> Camera -> Render)
@@ -67,7 +67,7 @@ function spawnStatic() {
 const numBouncers = 500;
 for (let i = 0; i < numBouncers; i++) spawnBouncer();
 
-const numStatics = 300;
+const numStatics = 1000;
 for (let i = 0; i < numStatics; i++) spawnStatic();
 
 // +/- key controls
