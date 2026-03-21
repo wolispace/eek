@@ -79,7 +79,13 @@ export class RenderSystem extends System {
             const drawY = pos.y - world.cameraY;
 
             this.ctx.fillStyle = renderable.color;
-            this.ctx.fillRect(drawX, drawY, renderable.width, renderable.height);
+            if (renderable.radius > 0) {
+                this.ctx.beginPath();
+                this.ctx.roundRect(drawX, drawY, renderable.width, renderable.height, renderable.radius);
+                this.ctx.fill();
+            } else {
+                this.ctx.fillRect(drawX, drawY, renderable.width, renderable.height);
+            }
         }
 
         this.ctx.restore();

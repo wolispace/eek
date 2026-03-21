@@ -26,7 +26,7 @@ world.addSystem(new RenderSystem());
 const player = world.createEntity();
 world.addComponent(player, Position, createPosition(window.innerWidth / 2, window.innerHeight / 2));
 world.addComponent(player, Velocity, createVelocity(0, 0));
-world.addComponent(player, Renderable, createRenderable(40, 40, 'blue')); // Cyan player
+world.addComponent(player, Renderable, createRenderable(40, 40, 'white', 10)); // Rounded square player
 world.addComponent(player, PlayerControl, createPlayerControl(300)); // 300px per second
 world.addComponent(player, CameraFocus, createCameraFocus());
 world.addComponent(player, Collidable, createCollidable());
