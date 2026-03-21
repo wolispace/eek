@@ -3,6 +3,7 @@ import { Position } from '../components/Position.js';
 import { Velocity } from '../components/Velocity.js';
 import { Renderable } from '../components/Renderable.js';
 import { Collidable } from '../components/Collidable.js';
+import { PlayerControl } from '../components/PlayerControl.js';
 import { SpatialHashGrid } from '../utils/SpatialHashGrid.js';
 
 export class CollisionSystem extends System {
@@ -51,6 +52,7 @@ export class CollisionSystem extends System {
             const pos1 = world.getComponent(entity, Position);
             const vel1 = world.getComponent(entity, Velocity);
             const ren1 = world.getComponent(entity, Renderable);
+            const isPlayer = !!world.getComponent(entity, PlayerControl);
 
             this.grid.findNear(pos1.x, pos1.y, ren1.width, ren1.height, this.nearbyBuffer);
 
@@ -79,19 +81,52 @@ export class CollisionSystem extends System {
                     const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
 
                     if (isOtherStatic) {
-                        // Only push the mover back; reflect its velocity
-                        if (minOverlap === overlapLeft) {
-                            pos1.x -= overlapLeft;
-                            vel1.dx = -Math.abs(vel1.dx);
-                        } else if (minOverlap === overlapRight) {
-                            pos1.x += overlapRight;
-                            vel1.dx = Math.abs(vel1.dx);
-                        } else if (minOverlap === overlapTop) {
-                            pos1.y -= overlapTop;
-                            vel1.dy = -Math.abs(vel1.dy);
+                        if (isPlayer) {
+                            // Player SLIDING and CORNER SLIPPING logic
+                            const slideNudge = 1000; // Forceful enough to slip corners
+                            
+                            if (minOverlap === overlapLeft) {
+                                pos1.x -= overlapLeft;
+                                vel1.dx = 0;
+                                // Corner Slip: nudge toward nearest Y edge
+                                const relY = (pos1.y + ren1.height / 2) - pos2.y;
+                                if (relY < ren2.height / 2) vel1.dy -= slideNudge * deltaTime;
+                                else vel1.dy += slideNudge * deltaTime;
+                            } else if (minOverlap === overlapRight) {
+                                pos1.x += overlapRight;
+                                vel1.dx = 0;
+                                const relY = (pos1.y + ren1.height / 2) - pos2.y;
+                                if (relY < ren2.height / 2) vel1.dy -= slideNudge * deltaTime;
+                                else vel1.dy += slideNudge * deltaTime;
+                            } else if (minOverlap === overlapTop) {
+                                pos1.y -= overlapTop;
+                                vel1.dy = 0;
+                                // Corner Slip: nudge toward nearest X edge
+                                const relX = (pos1.x + ren1.width / 2) - pos2.x;
+                                if (relX < ren2.width / 2) vel1.dx -= slideNudge * deltaTime;
+                                else vel1.dx += slideNudge * deltaTime;
+                            } else {
+                                pos1.y += overlapBottom;
+                                vel1.dy = 0;
+                                const relX = (pos1.x + ren1.width / 2) - pos2.x;
+                                if (relX < ren2.width / 2) vel1.dx -= slideNudge * deltaTime;
+                                else vel1.dx += slideNudge * deltaTime;
+                            }
                         } else {
-                            pos1.y += overlapBottom;
-                            vel1.dy = Math.abs(vel1.dy);
+                            // Non-player static collision (BOUNCE)
+                            if (minOverlap === overlapLeft) {
+                                pos1.x -= overlapLeft;
+                                vel1.dx = -Math.abs(vel1.dx);
+                            } else if (minOverlap === overlapRight) {
+                                pos1.x += overlapRight;
+                                vel1.dx = Math.abs(vel1.dx);
+                            } else if (minOverlap === overlapTop) {
+                                pos1.y -= overlapTop;
+                                vel1.dy = -Math.abs(vel1.dy);
+                            } else {
+                                pos1.y += overlapBottom;
+                                vel1.dy = Math.abs(vel1.dy);
+                            }
                         }
                     } else {
                         // Mover vs mover: split separation and swap velocities
