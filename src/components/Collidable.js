@@ -1,5 +1,7 @@
 export const Collidable = 'Collidable';
 
 export function createCollidable() {
-    return {};
+    return {
+        activeInteractions: new Set()
+    };
 }

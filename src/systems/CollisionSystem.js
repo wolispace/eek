@@ -4,6 +4,8 @@ import { Velocity } from '../components/Velocity.js';
 import { Renderable } from '../components/Renderable.js';
 import { Collidable } from '../components/Collidable.js';
 import { PlayerControl } from '../components/PlayerControl.js';
+import { Feeling } from '../components/Feeling.js';
+import { Interaction } from '../components/Interaction.js';
 import { SpatialHashGrid } from '../utils/SpatialHashGrid.js';
 
 export class CollisionSystem extends System {
@@ -54,6 +56,9 @@ export class CollisionSystem extends System {
             const ren1 = world.getComponent(entity, Renderable);
             const isPlayer = !!world.getComponent(entity, PlayerControl);
 
+            const collidable1 = world.getComponent(entity, Collidable);
+            const frameCollisions = new Set();
+
             this.grid.findNear(pos1.x, pos1.y, ren1.width, ren1.height, this.nearbyBuffer);
 
             for (let j = 0; j < this.nearbyBuffer.length; j++) {
@@ -82,6 +87,26 @@ export class CollisionSystem extends System {
 
                     if (isOtherStatic) {
                         if (isPlayer) {
+                            // Debounced Interaction Logic
+                            frameCollisions.add(other);
+                            
+                            if (!collidable1.activeInteractions.has(other)) {
+                                const interactionComp = world.getComponent(other, Interaction);
+                                if (interactionComp && interactionComp.interactions.touch) {
+                                    const result = interactionComp.interactions.touch;
+                                    if (result.type === 'modify_feeling') {
+                                        const feeling = world.getComponent(entity, Feeling);
+                                        if (feeling) {
+                                            for (const [stat, change] of Object.entries(result.amount)) {
+                                                if (feeling[stat] !== undefined) {
+                                                    feeling[stat] = Math.min(8, Math.max(0, feeling[stat] + change));
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             // Player SLIDING and CORNER SLIPPING logic
                             const slideNudge = 1000; // Forceful enough to slip corners
                             
@@ -151,6 +176,8 @@ export class CollisionSystem extends System {
                     }
                 }
             }
+            // Update active collisions for next frame
+            collidable1.activeInteractions = frameCollisions;
         }
     }
 }

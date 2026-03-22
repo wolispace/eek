@@ -10,6 +10,9 @@ import { PlayerControlSystem } from './systems/PlayerControlSystem.js';
 import { CameraSystem } from './systems/CameraSystem.js';
 import { RenderSystem } from './systems/RenderSystem.js';
 import { CollisionSystem } from './systems/CollisionSystem.js';
+import { Feeling, createFeeling } from './components/Feeling.js';
+import { Interaction, createInteraction } from './components/Interaction.js';
+import { FeelingSystem } from './systems/FeelingSystem.js';
 
 const worldX = 10000;
 const worldY = 10000;
@@ -19,6 +22,7 @@ const world = new World(worldX, worldY);
 world.addSystem(new PlayerControlSystem());
 world.addSystem(new MovementSystem());
 world.addSystem(new CollisionSystem());
+world.addSystem(new FeelingSystem());
 world.addSystem(new CameraSystem());
 world.addSystem(new RenderSystem());
 
@@ -30,6 +34,7 @@ world.addComponent(player, Renderable, createRenderable(40, 40, 'white', 10)); /
 world.addComponent(player, PlayerControl, createPlayerControl(1000, 200, 1000)); // maxSpeed, acceleration, friction
 world.addComponent(player, CameraFocus, createCameraFocus());
 world.addComponent(player, Collidable, createCollidable());
+world.addComponent(player, Feeling, createFeeling(4, 4, 4, 4));
 
 // Create Bouncing Entities
 const colors = ['#ff3366', '#ff9933', '#cc33ff', '#33ccff', '#ffeb3b'];
@@ -62,6 +67,9 @@ function spawnStatic() {
     world.addComponent(entity, Position, createPosition(x, y));
     world.addComponent(entity, Renderable, createRenderable(size, size, color));
     world.addComponent(entity, Collidable, createCollidable());
+    world.addComponent(entity, Interaction, createInteraction({
+        touch: { type: 'modify_feeling', amount: { peaceful: -1 } }
+    }));
 }
 
 const numBouncers = 500;
