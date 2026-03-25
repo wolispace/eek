@@ -46,7 +46,7 @@ function spawnBouncer() {
     const x = Math.random() * (worldX - 30);
     const y = Math.random() * (worldY - 30);
     const angle = Math.random() * Math.PI * 2;
-    const speed = 100 + Math.random() * 150;
+    const speed = 2 + Math.random() * 150;
     const dx = Math.cos(angle) * speed;
     const dy = Math.sin(angle) * speed;
     const color = colors[Math.floor(Math.random() * colors.length)];
@@ -55,6 +55,10 @@ function spawnBouncer() {
     world.addComponent(bouncer, Velocity, createVelocity(dx, dy));
     world.addComponent(bouncer, Renderable, createRenderable(size, size, color));
     world.addComponent(bouncer, Collidable, createCollidable());
+
+    // All bouncers now have HOPE=1144 (very sad bouncers!)
+    world.addComponent(bouncer, Feeling, createFeeling(1, 1, 4, 4));
+
     bouncerIds.push(bouncer);
 }
 
@@ -67,9 +71,9 @@ function spawnStatic() {
     world.addComponent(entity, Position, createPosition(x, y));
     world.addComponent(entity, Renderable, createRenderable(size, size, color));
     world.addComponent(entity, Collidable, createCollidable());
-    world.addComponent(entity, Interaction, createInteraction({
-        touch: { type: 'modify_feeling', amount: { peaceful: -1 } }
-    }));
+
+    // All statics represent the 'vibe' of 6446
+    world.addComponent(entity, Feeling, createFeeling(6, 4, 4, 6));
 }
 
 const numBouncers = 500;

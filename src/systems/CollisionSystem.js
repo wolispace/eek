@@ -6,6 +6,7 @@ import { Collidable } from '../components/Collidable.js';
 import { PlayerControl } from '../components/PlayerControl.js';
 import { Feeling } from '../components/Feeling.js';
 import { Interaction } from '../components/Interaction.js';
+import { FeelingSystem } from './FeelingSystem.js';
 import { SpatialHashGrid } from '../utils/SpatialHashGrid.js';
 
 export class CollisionSystem extends System {
@@ -86,26 +87,32 @@ export class CollisionSystem extends System {
                     const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
 
                     if (isOtherStatic) {
-                        if (isPlayer) {
-                            // Debounced Interaction Logic
-                            frameCollisions.add(other);
-                            
-                            if (!collidable1.activeInteractions.has(other)) {
-                                const interactionComp = world.getComponent(other, Interaction);
-                                if (interactionComp && interactionComp.interactions.touch) {
-                                    const result = interactionComp.interactions.touch;
-                                    if (result.type === 'modify_feeling') {
-                                        const feeling = world.getComponent(entity, Feeling);
-                                        if (feeling) {
-                                            for (const [stat, change] of Object.entries(result.amount)) {
-                                                if (feeling[stat] !== undefined) {
-                                                    feeling[stat] = Math.min(8, Math.max(0, feeling[stat] + change));
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                        // All collisions with statics trigger feeling transfer if both have feelings
+                        const feelings1 = world.getComponent(entity, Feeling);
+                        const feelings2 = world.getComponent(other, Feeling);
+                        if (feelings1 && feelings2 && !collidable1.activeInteractions.has(other)) {
+                            const isEntityPlayer = !!world.getComponent(entity, PlayerControl);
+                            const isOtherPlayer = !!world.getComponent(other, PlayerControl);
+
+                            if (isEntityPlayer || isOtherPlayer) {
+                                const playerID = isEntityPlayer ? 'Player' : `Entity_${entity}`;
+                                const otherID = isOtherPlayer ? 'Player' : `Entity_${other}`;
+                                
+                                console.log(`Collision: ${playerID} (${FeelingSystem.encode(feelings1)}) hits ${otherID} (${FeelingSystem.encode(feelings2)})`);
+                                
+                                // Transfer from source to target (neutralize target)
+                                FeelingSystem.transferFeelings(feelings1, feelings2);
+                                
+                                console.log(`Result: ${playerID} (${FeelingSystem.encode(feelings1)}) | ${otherID} (${FeelingSystem.encode(feelings2)})`);
+                            } else {
+                                // Background transfer still happens, just no log
+                                FeelingSystem.transferFeelings(feelings1, feelings2);
                             }
+                        }
+
+                        if (isPlayer) {
+                            // Debounced Interaction Logic (for non-feeling interactions if any remain)
+                            frameCollisions.add(other);
 
                             // Player SLIDING and CORNER SLIPPING logic
                             const slideNudge = 1000; // Forceful enough to slip corners
@@ -172,6 +179,21 @@ export class CollisionSystem extends System {
                             pos1.y += minOverlap / 2;
                             pos2.y -= minOverlap / 2;
                             let tmp = vel1.dy; vel1.dy = vel2.dy; vel2.dy = tmp;
+                        }
+
+                        const feelings1 = world.getComponent(entity, Feeling);
+                        const feelings2 = world.getComponent(other, Feeling);
+                        if (feelings1 && feelings2) {
+                            const isEntityPlayer = !!world.getComponent(entity, PlayerControl);
+                            const isOtherPlayer = !!world.getComponent(other, PlayerControl);
+
+                            if (isEntityPlayer || isOtherPlayer) {
+                                console.log(`Dynamic Collision: Entity_${entity} (${FeelingSystem.encode(feelings1)}) hits Entity_${other} (${FeelingSystem.encode(feelings2)})`);
+                                FeelingSystem.transferFeelings(feelings1, feelings2);
+                                console.log(`Result: Entity_${entity} (${FeelingSystem.encode(feelings1)}) | Entity_${other} (${FeelingSystem.encode(feelings2)})`);
+                            } else {
+                                FeelingSystem.transferFeelings(feelings1, feelings2);
+                            }
                         }
                     }
                 }

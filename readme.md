@@ -47,7 +47,38 @@ Frog01, Touch      , ''            , Peaceful+4    , Peaceful-2, 'QUEST COMPLETE
 
 Some entities share the same interactions eg: all trees do the same thing, but others are one-off like the Gate and Frog that is a specific quest relying on a Shrine being in a field behind a gate of courage.
 
-So maybe there are two lists, one being th deault natural interactions of entities, the other being one-off unqie quest interactions/conditions.
+So maybe there are two lists, one being the default natural interactions of entities, the other being one-off unique quest interactions/conditions.
+
+## Naming
+
+
+
+## Passing feelings
+Happy      [#######--] (6) <i class="fa-solid fa-face-smile"></i>
+Optomistic [#---+----] (0) <i class="fa-solid fa-glass-water"></i>
+Peaceful  [########-] (7) <i class="fa-solid fa-peace"></i>
+Energetic  [###-+----] (2) <i class="fa-solid fa-bolt-lightning"></i>
+
+HOPE.
+
+A frog is HOPE=4441, It has no energy.
+When you bump into it you only xfer your emoptions to make then nutral 4444.
+
+So your HOPE=7246. So the frog is now up to 4443, one more to go.
+You are down to 7244.  Do you dip down to 7243 and you give as much energy as you can to the frog. I think so. The Frog is now 4444 and the quest is complete. You are now down to 7243.
+
+If everything you bump into, you give as much as you can to make the nutral 4444. Anything bumping into you does the same.
+
+but what if a flying rock of 1144 bumps into you? Your 7243 becomes 4044. The rocks H=1 is -3 from nutral 4. So we add 7 -3 = 4.
+
+Does this mean the rock becomes H=4? Yes, we are making the rock nutral.
+
+If a Bunny bumps into you and its 8448, You become 8448. The bunny becomes 4444.
+
+So it is always a two-way interaction, bumping into something simply xfers between the two, does not matter which bumps first.
+
+This then raises the question of a default HOPE eg 1144 for a flying rock, and it will, over time, deckay to its default.
+
 
 
 

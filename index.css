@@ -39,8 +39,9 @@ canvas {
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(10px);
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 30px;
+    gap: 15px 30px;
     padding: 10px;
     color: #cdd6f4;
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
@@ -50,6 +51,22 @@ canvas {
 }
 
 .feeling-item {
-    white-space: pre-wrap;
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.feeling-icons {
+    display: flex;
+    gap: 2px;
+}
+
+.fa-solid {
+    color: #f9e2af; /* Pale yellow/gold for icons */
+}
+
+.empty-icon {
+    opacity: 0.2;
+    filter: grayscale(1);
 }
