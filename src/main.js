@@ -13,6 +13,7 @@ import { CollisionSystem } from './systems/CollisionSystem.js';
 import { Feeling, createFeeling } from './components/Feeling.js';
 import { Interaction, createInteraction } from './components/Interaction.js';
 import { FeelingSystem } from './systems/FeelingSystem.js';
+import { BOUNCER_CONFIGS, STATIC_CONFIGS, decodeHope } from './utils/EntityConfigs.js';
 
 const worldX = 10000;
 const worldY = 10000;
@@ -36,9 +37,7 @@ world.addComponent(player, CameraFocus, createCameraFocus());
 world.addComponent(player, Collidable, createCollidable());
 world.addComponent(player, Feeling, createFeeling(4, 4, 4, 4));
 
-// Create Bouncing Entities
-const colors = ['#ff3366', '#ff9933', '#cc33ff', '#33ccff', '#ffeb3b'];
-const staticColors = ['#4ade80', '#f87171', '#60a5fa', '#facc15', '#a78bfa', '#fb923c', '#34d399', '#f472b6'];
+// Variations now handled in EntityConfigs.js
 const bouncerIds = [];
 
 function spawnBouncer() {
@@ -49,15 +48,17 @@ function spawnBouncer() {
     const speed = 2 + Math.random() * 150;
     const dx = Math.cos(angle) * speed;
     const dy = Math.sin(angle) * speed;
-    const color = colors[Math.floor(Math.random() * colors.length)];
+    const config = BOUNCER_CONFIGS[Math.floor(Math.random() * BOUNCER_CONFIGS.length)];
+    const color = config.color;
     const size = 20 + Math.random() * 20;
     world.addComponent(bouncer, Position, createPosition(x, y));
     world.addComponent(bouncer, Velocity, createVelocity(dx, dy));
     world.addComponent(bouncer, Renderable, createRenderable(size, size, color));
     world.addComponent(bouncer, Collidable, createCollidable());
 
-    // All bouncers now have HOPE=1144 (very sad bouncers!)
-    world.addComponent(bouncer, Feeling, createFeeling(1, 1, 4, 4));
+    // Apply curated HOPE values
+    const [h, o, p, e] = decodeHope(config.hope);
+    world.addComponent(bouncer, Feeling, createFeeling(h, o, p, e));
 
     bouncerIds.push(bouncer);
 }
@@ -66,14 +67,17 @@ function spawnStatic() {
     const entity = world.createEntity();
     const x = Math.random() * worldX;
     const y = Math.random() * worldY;
-    const color = staticColors[Math.floor(Math.random() * staticColors.length)];
+    
+    const config = STATIC_CONFIGS[Math.floor(Math.random() * STATIC_CONFIGS.length)];
+    const color = config.color;
     const size = 15 + Math.random() * 45;
     world.addComponent(entity, Position, createPosition(x, y));
     world.addComponent(entity, Renderable, createRenderable(size, size, color));
     world.addComponent(entity, Collidable, createCollidable());
 
-    // All statics represent the 'vibe' of 6446
-    world.addComponent(entity, Feeling, createFeeling(6, 4, 4, 6));
+    // Apply curated HOPE values
+    const [h, o, p, e] = decodeHope(config.hope);
+    world.addComponent(entity, Feeling, createFeeling(h, o, p, e));
 }
 
 const numBouncers = 500;
