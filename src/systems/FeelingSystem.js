@@ -24,36 +24,40 @@ export class FeelingSystem extends System {
     }
 
     update(world, deltaTime) {
-        const playerEntities = world.query(Feeling, PlayerControl);
-        if (playerEntities.length === 0) return;
+        this.decayAccumulator += deltaTime;
+        const entitiesWithFeeling = world.query(Feeling);
+        const shouldDecay = this.decayAccumulator >= this.decayInterval;
 
-        const player = playerEntities[0];
-        const feelings = world.getComponent(player, Feeling);
+        for (let i = 0; i < entitiesWithFeeling.length; i++) {
+            const entity = entitiesWithFeeling[i];
+            const feelings = world.getComponent(entity, Feeling);
+            
+            // 1. Handle Decay for ALL entities
+            // Only decay if stationary or static
+            const vel = world.getComponent(entity, 'Velocity');
+            const isIdle = vel ? (Math.abs(vel.dx) < 1 && Math.abs(vel.dy) < 1) : true;
 
-        // 1. Handle Decay
-        // For simplicity: if player is roughly stationary, decay to neutral (4)
-        const vel = world.getComponent(player, 'Velocity');
-        const isIdle = vel ? (Math.abs(vel.dx) < 1 && Math.abs(vel.dy) < 1) : true;
-
-        if (isIdle) {
-            this.decayAccumulator += deltaTime;
-            if (this.decayAccumulator >= this.decayInterval) {
-                this.decayAccumulator = 0;
-                this.decayToNeutral(feelings);
+            if (isIdle && shouldDecay) {
+                this.decayToDefault(feelings);
             }
-        } else {
-            this.decayAccumulator = 0;
+
+            // 2. Update UI (only for player)
+            if (world.getComponent(entity, PlayerControl)) {
+                this.updateUI(feelings);
+            }
         }
 
-        // 2. Update UI
-        this.updateUI(feelings);
+        if (shouldDecay) {
+            this.decayAccumulator = 0;
+        }
     }
 
-    decayToNeutral(feelings) {
+    decayToDefault(feelings) {
         const keys = ['happy', 'optimistic', 'peaceful', 'energetic'];
         keys.forEach(key => {
-            if (feelings[key] > 4) feelings[key]--;
-            else if (feelings[key] < 4) feelings[key]++;
+            const baseline = feelings.default ? feelings.default[key] : 4;
+            if (feelings[key] > baseline) feelings[key]--;
+            else if (feelings[key] < baseline) feelings[key]++;
         });
     }
 
