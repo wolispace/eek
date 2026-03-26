@@ -30,7 +30,7 @@ world.addSystem(new RenderSystem());
 const player = world.createEntity();
 world.addComponent(player, Position, createPosition(window.innerWidth / 2, window.innerHeight / 2));
 world.addComponent(player, Velocity, createVelocity(0, 0));
-world.addComponent(player, Renderable, createRenderable(40, 40, 'white', 10)); // Rounded square player
+world.addComponent(player, Renderable, createRenderable(40, 40, 'white', 5)); // Rounded square player
 world.addComponent(player, PlayerControl, createPlayerControl(1000, 200, 1000)); // maxSpeed, acceleration, friction
 world.addComponent(player, CameraFocus, createCameraFocus());
 world.addComponent(player, Collidable, createCollidable());

@@ -1,6 +1,8 @@
 import { System } from '../ecs.js';
 import { Position } from '../components/Position.js';
 import { Renderable } from '../components/Renderable.js';
+import { Feeling } from '../components/Feeling.js';
+import { FEELING_CONFIG } from '../utils/FeelingColors.js';
 
 export class RenderSystem extends System {
     init(world) {
@@ -55,9 +57,9 @@ export class RenderSystem extends System {
         const entities = world.query(Position, Renderable);
 
         // Viewport bounds in world-space for culling
-        const vpLeft   = world.cameraX;
-        const vpTop    = world.cameraY;
-        const vpRight  = world.cameraX + this.canvas.width  / zoom;
+        const vpLeft = world.cameraX;
+        const vpTop = world.cameraY;
+        const vpRight = world.cameraX + this.canvas.width / zoom;
         const vpBottom = world.cameraY + this.canvas.height / zoom;
 
         for (const entity of entities) {
@@ -66,10 +68,10 @@ export class RenderSystem extends System {
 
             // Frustum Culling: skip drawing if entirely outside viewport
             if (
-                pos.x + renderable.width  < vpLeft  ||
-                pos.x                     > vpRight  ||
-                pos.y + renderable.height < vpTop    ||
-                pos.y                     > vpBottom
+                pos.x + renderable.width < vpLeft ||
+                pos.x > vpRight ||
+                pos.y + renderable.height < vpTop ||
+                pos.y > vpBottom
             ) {
                 continue;
             }
@@ -86,8 +88,88 @@ export class RenderSystem extends System {
             } else {
                 this.ctx.fillRect(drawX, drawY, renderable.width, renderable.height);
             }
+
+            // Draw HOPE bars if the entity has feelings
+            const feelings = world.getComponent(entity, Feeling);
+            if (feelings) {
+                this.renderFeelingBars(this.ctx, drawX, drawY, renderable.width, renderable.height, feelings);
+            }
         }
 
         this.ctx.restore();
+    }
+
+    renderFeelingBars(ctx, x, y, width, height, feelings) {
+        const config = FEELING_CONFIG;
+        const wScale = config.widthScale || 0.9;
+        const hScale = config.heightScale || 0.6;
+        const thickness = config.thickness || 1;
+
+        // Total rows/bars = 4 (H, O, P, E)
+        const barRows = 4;
+        const totalUnits = config.segments + 1; // 1 letter + 8 steps
+        const gap = config.gap || 0.5;
+
+        const chartWidth = width * wScale;
+        const chartHeight = height * hScale;
+
+        // Separate width and height for bars
+        const unitWidth = chartWidth / totalUnits;
+        const baseUnitHeight = (chartHeight - (barRows - 1) * gap) / barRows;
+        const unitHeight = baseUnitHeight * thickness;
+
+        const rowKeys = [
+            { key: 'happy', color: 'H', label: config.icons.happy },
+            { key: 'optimistic', color: 'O', label: config.icons.optimistic },
+            { key: 'peaceful', color: 'P', label: config.icons.peaceful },
+            { key: 'energetic', color: 'E', label: config.icons.energetic }
+        ];
+
+        ctx.save();
+
+        // Start from top-left with margins
+        const offsetX = 1;
+        const offsetY = 5; // User requested 5
+
+        rowKeys.forEach((row, rowIndex) => {
+            const rowY = y + offsetY + rowIndex * (unitHeight + gap);
+            const value = feelings[row.key];
+            const colors = config[row.color];
+
+            // 1. Draw Letter in Black
+            ctx.fillStyle = config.iconColor || '#000000';
+            ctx.font = `bold ${Math.floor(unitHeight)}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const labelX = x + offsetX + unitWidth / 2;
+            const labelY = rowY + unitHeight / 2;
+            ctx.fillText(row.label, labelX, labelY);
+
+            // 2. Draw Solid Bar
+            const barStartX = x + offsetX + unitWidth;
+            const maxBarWidth = 8 * unitWidth;
+
+            // Value portion width
+            const feelingWidth = (value / 8) * maxBarWidth;
+            const remainingWidth = maxBarWidth - feelingWidth;
+
+            // Color logic: < 4 dull, >= 4 bright
+            const feelingColor = value >= 4 ? colors.bright : colors.dull;
+
+            // Draw feeling part
+            if (feelingWidth > 0) {
+                ctx.fillStyle = feelingColor;
+                ctx.fillRect(barStartX, rowY, feelingWidth, unitHeight);
+            }
+
+            // Draw grey part
+            if (remainingWidth > 0) {
+                ctx.fillStyle = config.emptyBar;
+                ctx.fillRect(barStartX + feelingWidth, rowY, remainingWidth, unitHeight);
+            }
+        });
+
+        ctx.restore();
     }
 }
