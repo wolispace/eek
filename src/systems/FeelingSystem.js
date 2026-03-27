@@ -31,13 +31,9 @@ export class FeelingSystem extends System {
         for (let i = 0; i < entitiesWithFeeling.length; i++) {
             const entity = entitiesWithFeeling[i];
             const feelings = world.getComponent(entity, Feeling);
-            
-            // 1. Handle Decay for ALL entities
-            // Only decay if stationary or static
-            const vel = world.getComponent(entity, 'Velocity');
-            const isIdle = vel ? (Math.abs(vel.dx) < 1 && Math.abs(vel.dy) < 1) : true;
 
-            if (isIdle && shouldDecay) {
+            // 1. Handle Universal Decay
+            if (shouldDecay) {
                 this.decayToDefault(feelings);
             }
 
