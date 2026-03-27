@@ -13,6 +13,8 @@ import { CollisionSystem } from './systems/CollisionSystem.js';
 import { Feeling, createFeeling } from './components/Feeling.js';
 import { Interaction, createInteraction } from './components/Interaction.js';
 import { FeelingSystem } from './systems/FeelingSystem.js';
+import { TradeSystem } from './systems/TradeSystem.js';
+import { createTradable } from './components/Tradable.js';
 import { BOUNCER_CONFIGS, STATIC_CONFIGS, decodeHope } from './utils/EntityConfigs.js';
 
 const worldX = 10000;
@@ -24,6 +26,7 @@ world.addSystem(new PlayerControlSystem());
 world.addSystem(new MovementSystem());
 world.addSystem(new CollisionSystem());
 world.addSystem(new FeelingSystem());
+world.addSystem(new TradeSystem());
 world.addSystem(new CameraSystem());
 world.addSystem(new RenderSystem());
 
@@ -78,6 +81,10 @@ function spawnStatic() {
     // Apply curated HOPE values
     const [h, o, p, e] = decodeHope(config.hope);
     world.addComponent(entity, Feeling, createFeeling(h, o, p, e));
+
+    if (config.tradable) {
+        world.addComponent(entity, 'Tradable', createTradable());
+    }
 }
 
 const numBouncers = 500;

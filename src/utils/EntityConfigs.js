@@ -10,13 +10,13 @@ export const BOUNCER_CONFIGS = [
 ];
 
 export const STATIC_CONFIGS = [
-    { color: '#4ade80', hope: '6666' }, // Green - Peaceful/Positive
+    { color: '#4ade80', hope: '6666', tradable: true }, // Green - Peaceful/Positive
     { color: '#facc15', hope: '8844' }, // Yellow - Joyful
-    { color: '#fb7185', hope: '4488' }, // Rose - Loving/Serene
+    { color: '#fb7185', hope: '4488', tradable: true }, // Rose - Loving/Serene
     { color: '#a78bfa', hope: '7557' }, // Purple - Dreamy
-    { color: '#34d399', hope: '5785' }, // Emerald - Optimistic
+    { color: '#34d399', hope: '5785', tradable: true }, // Emerald - Optimistic
     { color: '#fbbf24', hope: '8448' }, // Amber - Energetic/Happy
-    { color: '#818cf8', hope: '6776' }, // Indigo - Deeply Peaceful
+    { color: '#818cf8', hope: '6776', tradable: true }, // Indigo - Deeply Peaceful
     { color: '#2dd4bf', hope: '4884' }  // Teal - Calmly Optimistic
 ];
 

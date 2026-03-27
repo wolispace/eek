@@ -70,3 +70,125 @@ canvas {
     opacity: 0.2;
     filter: grayscale(1);
 }
+
+/* Trade Dialog */
+#trade-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.trade-dialog {
+    background: #181825;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    width: 440px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    color: #cdd6f4;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.trade-close-square {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    width: 30px;
+    height: 30px;
+    background: #e64d4d;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    transition: background 0.2s, transform 0.1s;
+}
+.trade-close-square:hover {
+    background: #ff5c5c;
+    transform: scale(1.05);
+}
+.trade-close-square:active { transform: scale(0.95); }
+
+.trade-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.trade-section h3 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+}
+
+.trade-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.trade-label {
+    width: 15px;
+    font-weight: bold;
+    color: #f9e2af;
+}
+
+.trade-bar-container {
+    flex-grow: 1;
+    height: 10px;
+    background: #313244;
+    display: flex;
+    gap: 0; /* Solid bar look like bouncers */
+}
+
+.trade-segment-fill {
+    height: 100%;
+}
+
+.trade-segment-empty {
+    flex-grow: 1;
+    height: 100%;
+    background: #45475a;
+}
+
+.trade-controls {
+    display: flex;
+    gap: 4px;
+}
+
+.trade-btn {
+    background: #45475a;
+    border: none;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    transition: transform 0.1s, background 0.2s;
+}
+.trade-btn:hover { 
+    background: #585b70;
+    transform: scale(1.1); 
+}
+.trade-btn:active { transform: scale(0.9); }

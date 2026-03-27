@@ -6,6 +6,7 @@ import { Collidable } from '../components/Collidable.js';
 import { PlayerControl } from '../components/PlayerControl.js';
 import { Feeling } from '../components/Feeling.js';
 import { Interaction } from '../components/Interaction.js';
+import { Tradable } from '../components/Tradable.js';
 import { FeelingSystem } from './FeelingSystem.js';
 import { SpatialHashGrid } from '../utils/SpatialHashGrid.js';
 
@@ -90,24 +91,17 @@ export class CollisionSystem extends System {
                         // All collisions with statics trigger feeling transfer if both have feelings
                         const feelings1 = world.getComponent(entity, Feeling);
                         const feelings2 = world.getComponent(other, Feeling);
-                        if (feelings1 && feelings2 && !collidable1.activeInteractions.has(other)) {
-                            const isEntityPlayer = !!world.getComponent(entity, PlayerControl);
-                            const isOtherPlayer = !!world.getComponent(other, PlayerControl);
+                        const isTradable = world.hasComponent(other, Tradable);
 
-                            if (isEntityPlayer || isOtherPlayer) {
-                                const playerID = isEntityPlayer ? 'Player' : `Entity_${entity}`;
-                                const otherID = isOtherPlayer ? 'Player' : `Entity_${other}`;
-                                
-                                console.log(`Collision: ${playerID} (${FeelingSystem.encode(feelings1)}) hits ${otherID} (${FeelingSystem.encode(feelings2)})`);
-                                
-                                // Transfer from source to target (neutralize target)
-                                FeelingSystem.transferFeelings(feelings1, feelings2);
-                                
-                                console.log(`Result: ${playerID} (${FeelingSystem.encode(feelings1)}) | ${otherID} (${FeelingSystem.encode(feelings2)})`);
-                            } else {
-                                // Background transfer still happens, just no log
-                                FeelingSystem.transferFeelings(feelings1, feelings2);
-                            }
+                        if (feelings1 && feelings2 && !collidable1.activeInteractions.has(other) && !isTradable) {
+                            // Regular feeling transfer (skip if tradable)
+                            FeelingSystem.transferFeelings(feelings1, feelings2);
+                        }
+
+                        // Check for Tradable
+                        if (isPlayer && isTradable && !collidable1.activeInteractions.has(other)) {
+                            world.isPaused = true;
+                            world.activeTrade = { player: entity, target: other };
                         }
 
                         if (isPlayer) {

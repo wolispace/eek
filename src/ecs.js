@@ -15,6 +15,7 @@ export class World {
         // Maps component name -> Map(entityId -> componentData)
         this.components = new Map();
         this.systems = [];
+        this.isPaused = false;
     }
 
     createEntity() {
@@ -79,6 +80,13 @@ export class World {
 
     update(deltaTime) {
         for (const system of this.systems) {
+            // By default, physics and input systems are skipped if paused
+            // Only we allow UI-related systems to update
+            const name = system.constructor.name;
+            const skipIfPaused = ['PlayerControlSystem', 'MovementSystem', 'CollisionSystem', 'FeelingSystem'].includes(name);
+            
+            if (this.isPaused && skipIfPaused) continue;
+            
             system.update(this, deltaTime);
         }
     }
