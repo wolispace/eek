@@ -19,14 +19,16 @@ export class TradeSystem extends System {
         this.overlay.id = 'trade-dialog-overlay';
         this.overlay.innerHTML = `
             <div class="trade-dialog" id="trade-dialog-inner">
-                <button class="trade-close-square" id="trade-close-btn">&times;</button>
-                <div class="trade-section" id="target-section">
-                    <h3>Entity Feelings</h3>
-                    <div id="target-rows"></div>
-                </div>
+                <div class="dialog-header">
+                   <button class="trade-close-square" id="trade-close-btn">&times;</button>
+                </div>   
                 <div class="trade-section" id="player-section">
                     <h3>Your Feelings</h3>
                     <div id="player-rows"></div>
+                </div>
+                <div class="trade-section" id="target-section">
+                    <h3>Entity Feelings</h3>
+                    <div id="target-rows"></div>
                 </div>
             </div>
         `;
@@ -74,51 +76,60 @@ export class TradeSystem extends System {
         playerRows.innerHTML = '';
 
         keys.forEach((key, i) => {
-            targetRows.appendChild(this.createRow(key, labels[i], tFeelings[key], true, world));
             playerRows.appendChild(this.createRow(key, labels[i], pFeelings[key], false, world));
+            targetRows.appendChild(this.createRow(key, labels[i], tFeelings[key], true, world));
         });
     }
 
     createRow(key, label, value, isTarget, world) {
+
+        const labelIcons = {
+            'H': '<i class="fa-solid fa-smile "></i>',
+            'O': '<i class="fa-solid fa-sun "></i>',
+            'P': '<i class="fa-solid fa-dove "></i>',
+            'E': '<i class="fa-solid fa-bolt "></i>'
+        };
+
+
         const row = document.createElement('div');
         row.className = 'trade-row';
-        
+
         const labelEl = document.createElement('div');
         labelEl.className = 'trade-label';
-        labelEl.textContent = label;
+        labelEl.innerHTML = labelIcons[label];
         row.appendChild(labelEl);
 
         const barContainer = document.createElement('div');
         barContainer.className = 'trade-bar-container';
-        
+
         const fill = document.createElement('div');
         fill.className = 'trade-segment-fill';
         const colorKey = label; // H, O, P, E
         const color = value >= 4 ? FEELING_CONFIG[colorKey].bright : FEELING_CONFIG[colorKey].dull;
         fill.style.backgroundColor = color;
         fill.style.width = `${(value / 8) * 100}%`;
-        
+
         const empty = document.createElement('div');
         empty.className = 'trade-segment-empty';
-        
+
         barContainer.appendChild(fill);
         barContainer.appendChild(empty);
         row.appendChild(barContainer);
 
-        if (isTarget) {
+        if (!isTarget) {
             const controls = document.createElement('div');
             controls.className = 'trade-controls';
-            
+
             const minusBtn = document.createElement('button');
             minusBtn.className = 'trade-btn';
-            minusBtn.textContent = '-';
+            minusBtn.textContent = '+';
             minusBtn.onclick = () => this.trade(world, key, -1);
-            
+
             const plusBtn = document.createElement('button');
             plusBtn.className = 'trade-btn';
-            plusBtn.textContent = '+';
+            plusBtn.textContent = '-';
             plusBtn.onclick = () => this.trade(world, key, 1);
-            
+
             controls.appendChild(minusBtn);
             controls.appendChild(plusBtn);
             row.appendChild(controls);
