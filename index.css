@@ -90,14 +90,15 @@ canvas {
     background: #181825;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
-    padding: 24px;
-    width: 440px;
+    padding: 20px;
+    width: 95%;
+    max-width: 650px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
     color: #cdd6f4;
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 12px;
 }
 
 .trade-close-square {
@@ -125,37 +126,44 @@ canvas {
 }
 .trade-close-square:active { transform: scale(0.95); }
 
-.trade-section {
+.trade-header-row {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    justify-content: space-between;
+    padding: 0 10px;
+    margin-bottom: 10px;
 }
 
-.trade-section h3 {
+.trade-header-title {
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 1px;
     opacity: 0.8;
+    flex: 1;
+    text-align: center;
 }
 
-.trade-row {
+.trade-row-combined {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px; /* Slightly tighter for mobile */
+    margin-bottom: 8px;
 }
 
 .trade-label {
-    width: 15px;
+    width: 20px;
     font-weight: bold;
     color: #f9e2af;
+    text-align: center;
 }
 
 .trade-bar-container {
-    flex-grow: 1;
-    height: 10px;
+    flex: 1; /* Grow to fill available space */
+    height: 14px;
     background: #313244;
     display: flex;
-    gap: 0; /* Solid bar look like bouncers */
+    gap: 0; 
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 .trade-segment-fill {
@@ -171,20 +179,21 @@ canvas {
 .trade-controls {
     display: flex;
     gap: 4px;
+    padding: 0 4px;
 }
 
 .trade-btn {
     background: #45475a;
     border: none;
     color: white;
-    width: 24px;
-    height: 24px;
+    width: 28px; /* Slightly larger for touch */
+    height: 28px;
     border-radius: 6px;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 16px;
+    font-size: 18px;
     transition: transform 0.1s, background 0.2s;
 }
 .trade-btn:hover { 
