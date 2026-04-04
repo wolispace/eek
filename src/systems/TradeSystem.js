@@ -1,6 +1,8 @@
 import { System } from '../ecs.js';
 import { Feeling } from '../components/Feeling.js';
 import { Buff } from '../components/Buff.js';
+import { Position } from '../components/Position.js';
+import { Renderable } from '../components/Renderable.js';
 import { FEELING_CONFIG } from '../utils/FeelingColors.js';
 
 export class TradeSystem extends System {
@@ -51,16 +53,31 @@ export class TradeSystem extends System {
     show(world, player, target) {
         this.activePlayer = player;
         this.activeEntity = target;
-        this.overlay.style.display = 'flex';
+        
+        const inner = document.getElementById('trade-dialog-inner');
+        
+        // Simpler approach: grow from center of screen
+        inner.style.transformOrigin = 'center center';
+        this.overlay.classList.add('active'); 
+        inner.classList.add('active');
+
         this.render(world);
     }
 
     close(world) {
-        this.overlay.style.display = 'none';
-        world.isPaused = false;
-        world.activeTrade = null;
-        this.activeEntity = null;
-        this.activePlayer = null;
+        const inner = document.getElementById('trade-dialog-inner');
+        this.overlay.classList.remove('active');
+        inner.classList.remove('active');
+
+        // Reset game state after animation finishes (matching CSS --trade-anim-speed)
+        setTimeout(() => {
+            if (!this.overlay.classList.contains('active')) {
+                world.isPaused = false;
+                world.activeTrade = null;
+                this.activeEntity = null;
+                this.activePlayer = null;
+            }
+        }, 1000); // Slightly more than the 0.8s CSS transition
     }
 
     render(world) {

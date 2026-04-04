@@ -1,4 +1,4 @@
-# Simple experiment with ECS
+# EEK - Experiment with ECS
 
 https://wolispace.com/eek/
 
@@ -24,33 +24,30 @@ https://wolispace.com/eek/
 Every entity has 4 'feelings' default to neutral but can go negative or positive.
 Represented by a number 0 - 8 where 4 = newtral, 0 is max negative and 8 is max positive.
 
-Happy     [#######--] (6)
-Energetic [###-+----] (2)
-Couragous [#---+----] (0)
-Peaceful  [########-] (7)
+Happy      [#######--] (6)
+Optomistic [###------] (3)
+Peaceful   [#########] (8)
+Energetic  [---------] (0)
 
-This can be encoed and stored as a 4 digit number 6207, its 'state'.
+This can be encoded and stored as a 4 digit number HOPE = 6380.
 
-They 'decay' to neutral over time when the player is idle ie: 4444, however some 'buffs' will not decay eg a biome gives Couragous-2 (scary forrest) or carrying a stick raises courage +1.
+They 'decay' to neutral over time when the player is idle ie: 4444, however some 'buffs' will not decay eg an area gives Optomistic -2 (scary forrest) or carrying a stick raises Optomistic +1.
 
-Every entity (tree, rock, animal, player even biome) has the same 4 values.
+Every entity (tree, rock, animal, player even area) has the same 4 values.
 
 A table of Interactions indicates what happens when an entity is interacted with:
 
 Entity, Interaction, RequiredEntity, RequiredStates, ResultState, ResultEntity
-Tree  , Bump       , Axe           , Energetic+2   , Happy-1 Peaceful-1 Courage+1, Wood,
-Wood  , Carry      , Backpack      , ''            , Energetic-1 Courage+1, ''
-Pond  , Sit        , ''            , ''            , Happy+1 Energetic+1 Courage+1, ''
-Gate01, Move past  , ''            , Courage+2     , Courage-2, ''
+Tree  , Bump       , Axe           , Energetic+2   , Happy-1 Peaceful-1 Optimistic+1, Wood,
+Wood  , Carry      , Backpack      , ''            , Energetic-1 Optimistic+1, ''
+Pond  , Sit        , ''            , ''            , Happy+1 Energetic+1 Optimistic+1, ''
+Gate01, Move past  , ''            , Optimistic+2     , Optimistic-2, ''
 Shrine, Sit        , ''            , ''            , Peaceful+4, ''
 Frog01, Touch      , ''            , Peaceful+4    , Peaceful-2, 'QUEST COMPLETE'
 
-Some entities share the same interactions eg: all trees do the same thing, but others are one-off like the Gate and Frog that is a specific quest relying on a Shrine being in a field behind a gate of courage.
+Some entities share the same interactions eg: all trees do the same thing, but others are one-off like the Gate and Frog that is a specific quest relying on a Shrine being in a field behind a gate of Optimistic.
 
 So maybe there are two lists, one being the default natural interactions of entities, the other being one-off unique quest interactions/conditions.
-
-## Naming
-
 
 
 ## Passing feelings

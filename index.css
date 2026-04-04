@@ -4,12 +4,14 @@
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     width: 100%;
     height: 100%;
     overflow: hidden;
     background-color: #1e1e2e;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --trade-anim-speed: 0.8s;
 }
 
 canvas {
@@ -17,6 +19,7 @@ canvas {
     width: 100vw;
     height: 100vh;
 }
+
 #fps {
     position: fixed;
     top: 10px;
@@ -63,7 +66,8 @@ canvas {
 }
 
 .fa-solid {
-    color: #f9e2af; /* Pale yellow/gold for icons */
+    color: #f9e2af;
+    /* Pale yellow/gold for icons */
 }
 
 .empty-icon {
@@ -80,10 +84,22 @@ canvas {
     height: 100vh;
     background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(4px);
-    display: none;
+    display: flex;
     justify-content: center;
     align-items: center;
     z-index: 2000;
+
+    /* Animation state */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity var(--trade-anim-speed) ease, visibility var(--trade-anim-speed);
+}
+
+#trade-dialog-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .trade-dialog {
@@ -99,6 +115,16 @@ canvas {
     display: flex;
     flex-direction: column;
     gap: 12px;
+
+    /* Animation state */
+    transform: scale(0);
+    opacity: 1;
+    transition: transform var(--trade-anim-speed) cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity var(--trade-anim-speed) ease;
+}
+
+.trade-dialog.active {
+    transform: scale(1);
+    opacity: 1;
 }
 
 .trade-close-square {
@@ -120,11 +146,15 @@ canvas {
     line-height: 1;
     transition: background 0.2s, transform 0.1s;
 }
+
 .trade-close-square:hover {
     background: #ff5c5c;
     transform: scale(1.05);
 }
-.trade-close-square:active { transform: scale(0.95); }
+
+.trade-close-square:active {
+    transform: scale(0.95);
+}
 
 .trade-header-row {
     display: flex;
@@ -145,7 +175,8 @@ canvas {
 .trade-row-combined {
     display: flex;
     align-items: center;
-    gap: 8px; /* Slightly tighter for mobile */
+    gap: 8px;
+    /* Slightly tighter for mobile */
     margin-bottom: 8px;
 }
 
@@ -157,11 +188,12 @@ canvas {
 }
 
 .trade-bar-container {
-    flex: 1; /* Grow to fill available space */
+    flex: 1;
+    /* Grow to fill available space */
     height: 14px;
     background: #313244;
     display: flex;
-    gap: 0; 
+    gap: 0;
     border-radius: 4px;
     overflow: hidden;
 }
@@ -186,7 +218,8 @@ canvas {
     background: #45475a;
     border: none;
     color: white;
-    width: 28px; /* Slightly larger for touch */
+    width: 28px;
+    /* Slightly larger for touch */
     height: 28px;
     border-radius: 6px;
     cursor: pointer;
@@ -196,8 +229,12 @@ canvas {
     font-size: 18px;
     transition: transform 0.1s, background 0.2s;
 }
-.trade-btn:hover { 
+
+.trade-btn:hover {
     background: #585b70;
-    transform: scale(1.1); 
+    transform: scale(1.1);
 }
-.trade-btn:active { transform: scale(0.9); }
+
+.trade-btn:active {
+    transform: scale(0.9);
+}
