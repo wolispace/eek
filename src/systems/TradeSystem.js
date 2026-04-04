@@ -1,5 +1,6 @@
 import { System } from '../ecs.js';
 import { Feeling } from '../components/Feeling.js';
+import { Buff } from '../components/Buff.js';
 import { FEELING_CONFIG } from '../utils/FeelingColors.js';
 
 export class TradeSystem extends System {
@@ -74,17 +75,19 @@ export class TradeSystem extends System {
 
         rowsContainer.innerHTML = '';
         keys.forEach((key, i) => {
-            rowsContainer.appendChild(this.createCombinedRow(key, labels[i], pFeelings[key], tFeelings[key], world));
+            const baseKey = 'base' + key.charAt(0).toUpperCase() + key.slice(1);
+            // Display EFFECTIVE feelings in the bars
+            rowsContainer.appendChild(this.createCombinedRow(baseKey, labels[i], pFeelings[key], tFeelings[key], world));
         });
     }
 
-    createCombinedRow(key, label, pValue, tValue, world) {
+    createCombinedRow(baseKey, label, pValue, tValue, world) {
         const row = document.createElement('div');
         row.className = 'trade-row-combined';
 
         const labelEl = document.createElement('div');
         labelEl.className = 'trade-label';
-        labelEl.textContent = label; // Use "H", "O", "P", "E"
+        labelEl.textContent = label; // "H", "O", "P", "E"
         row.appendChild(labelEl);
 
         // Player Bar
@@ -97,13 +100,13 @@ export class TradeSystem extends System {
         const takeBtn = document.createElement('button');
         takeBtn.className = 'trade-btn';
         takeBtn.textContent = '<';
-        takeBtn.onclick = () => this.trade(world, key, -1); // Give to Player (Them -> You)
+        takeBtn.onclick = () => this.trade(world, baseKey, -1); // Give to Player (Them -> You)
         takeBtn.title = "Take feeling from them";
 
         const giveBtn = document.createElement('button');
         giveBtn.className = 'trade-btn';
         giveBtn.textContent = '>';
-        giveBtn.onclick = () => this.trade(world, key, 1); // Give to Target (You -> Them)
+        giveBtn.onclick = () => this.trade(world, baseKey, 1); // Give to Target (You -> Them)
         giveBtn.title = "Give feeling to them";
 
         controls.appendChild(takeBtn);
@@ -134,24 +137,49 @@ export class TradeSystem extends System {
         return bar;
     }
 
-    trade(world, key, delta) {
+    trade(world, baseKey, delta) {
         const pFeelings = world.getComponent(this.activePlayer, Feeling);
         const tFeelings = world.getComponent(this.activeEntity, Feeling);
 
         if (delta > 0) {
             // Give to entity (remove from player)
-            if (pFeelings[key] > 0 && tFeelings[key] < 8) {
-                pFeelings[key]--;
-                tFeelings[key]++;
+            if (pFeelings[baseKey] > 0 && tFeelings[baseKey] < 8) {
+                pFeelings[baseKey]--;
+                tFeelings[baseKey]++;
             }
         } else {
             // Take from entity (give to player)
-            if (tFeelings[key] > 0 && pFeelings[key] < 8) {
-                tFeelings[key]--;
-                pFeelings[key]++;
+            if (tFeelings[baseKey] > 0 && pFeelings[baseKey] < 8) {
+                tFeelings[baseKey]--;
+                pFeelings[baseKey]++;
             }
         }
+        // Force evaluation of effective feelings immediately so UI reflects change
+        this.evaluateEffective(pFeelings, world.getComponent(this.activePlayer, Buff));
+        this.evaluateEffective(tFeelings, world.getComponent(this.activeEntity, Buff));
+        
         this.render(world);
+    }
+
+    evaluateEffective(feelings, buffComp) {
+        let h = feelings.baseHappy;
+        let o = feelings.baseOptimistic;
+        let p = feelings.basePeaceful;
+        let e = feelings.baseEnergetic;
+
+        if (buffComp) {
+            for (const b of buffComp.active) {
+                h += (b.happy - 4);
+                o += (b.optimistic - 4);
+                p += (b.peaceful - 4);
+                e += (b.energetic - 4);
+            }
+        }
+
+        feelings.happy = Math.max(0, Math.min(8, h));
+        feelings.optimistic = Math.max(0, Math.min(8, o));
+        feelings.peaceful = Math.max(0, Math.min(8, p));
+        feelings.energetic = Math.max(0, Math.min(8, e));
     }
 
     update(world, deltaTime) {

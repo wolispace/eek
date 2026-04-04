@@ -51,36 +51,38 @@ export class FeelingSystem extends System {
     decayToDefault(feelings) {
         const keys = ['happy', 'optimistic', 'peaceful', 'energetic'];
         keys.forEach(key => {
+            const baseKey = 'base' + key.charAt(0).toUpperCase() + key.slice(1);
             const baseline = feelings.default ? feelings.default[key] : 4;
-            if (feelings[key] > baseline) feelings[key]--;
-            else if (feelings[key] < baseline) feelings[key]++;
+            if (feelings[baseKey] > baseline) feelings[baseKey]--;
+            else if (feelings[baseKey] < baseline) feelings[baseKey]++;
         });
     }
 
     static encode(feelings) {
         if (!feelings) return '????';
-        return `${feelings.happy}${feelings.optimistic}${feelings.peaceful}${feelings.energetic}`;
+        return `${feelings.baseHappy}${feelings.baseOptimistic}${feelings.basePeaceful}${feelings.baseEnergetic}`;
     }
 
     static transferFeelings(from, to) {
         const keys = ['happy', 'optimistic', 'peaceful', 'energetic'];
         keys.forEach(key => {
-            let needed = 4 - to[key];
+            const baseKey = 'base' + key.charAt(0).toUpperCase() + key.slice(1);
+            let needed = 4 - to[baseKey];
             if (needed === 0) return;
 
             let actual = 0;
             if (needed > 0) {
                 // 'to' needs positive energy (it's low)
                 // 'from' gives up to all it has (down to 0)
-                actual = Math.min(needed, from[key]);
+                actual = Math.min(needed, from[baseKey]);
             } else {
                 // 'to' needs to lose energy (it's high)
                 // 'from' takes up to its capacity (up to 8)
-                actual = -Math.min(Math.abs(needed), 8 - from[key]);
+                actual = -Math.min(Math.abs(needed), 8 - from[baseKey]);
             }
 
-            to[key] += actual;
-            from[key] -= actual;
+            to[baseKey] += actual;
+            from[baseKey] -= actual;
         });
     }
 

@@ -79,6 +79,31 @@ So it is always a two-way interaction, bumping into something simply xfers betwe
 
 This then raises the question of a default HOPE eg 1144 for a flying rock, and it will, over time, deckay to its default.
 
+## Buffs
+Each entrity can have zero, one or more buffs applied to their feelings
+
+Player: 6628
+Buff (ring of happiness) : 6444 [happy is +2 from avg 4] 
+Player now: 8628
+Buff (cursed hat of sadness) : 0444 [happy -4 from avg 4]
+Player now: 2628
+Remove hat and player back to 8628
+
+So buffs are attached to other entities, disconnect the entry from the player the buff is removed.
+
+We do not need random entities (rings, hats etc..) just yet, we will only use areas as the way for adding a buff for now.
+
+## Areas
+Areas are large rectangle static entities movable entities can move over and static entities are placed over.
+Areas can apply a buff eg a calming beach may increase happines, peace and energy by one = 5455.
+
+The areas buff is applied and removed when the moving entity (player or bouncer  etc..) is over the area or not, like other stackable buffs.
+
+The min/max width/height of the randome area rectangles should be from easily modified constants.
+
+
+
+
 
 
 

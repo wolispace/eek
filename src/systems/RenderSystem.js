@@ -2,6 +2,7 @@ import { System } from '../ecs.js';
 import { Position } from '../components/Position.js';
 import { Renderable } from '../components/Renderable.js';
 import { Feeling } from '../components/Feeling.js';
+import { Area } from '../components/Area.js';
 import { FEELING_CONFIG } from '../utils/FeelingColors.js';
 
 export class RenderSystem extends System {
@@ -62,39 +63,69 @@ export class RenderSystem extends System {
         const vpRight = world.cameraX + this.canvas.width / zoom;
         const vpBottom = world.cameraY + this.canvas.height / zoom;
 
-        for (const entity of entities) {
-            const pos = world.getComponent(entity, Position);
-            const renderable = world.getComponent(entity, Renderable);
+        // Two passes: Areas FIRST (background), then Others
+        const areaEntities = [];
+        const otherEntities = [];
 
-            // Frustum Culling: skip drawing if entirely outside viewport
-            if (
-                pos.x + renderable.width < vpLeft ||
-                pos.x > vpRight ||
-                pos.y + renderable.height < vpTop ||
-                pos.y > vpBottom
-            ) {
-                continue;
-            }
-
-            // Apply camera offset (in world-space, then scaled by zoom)
-            const drawX = pos.x - world.cameraX;
-            const drawY = pos.y - world.cameraY;
-
-            this.ctx.fillStyle = renderable.color;
-            if (renderable.radius > 0) {
-                this.ctx.beginPath();
-                this.ctx.roundRect(drawX, drawY, renderable.width, renderable.height, renderable.radius);
-                this.ctx.fill();
-            } else {
-                this.ctx.fillRect(drawX, drawY, renderable.width, renderable.height);
-            }
-
-            // Draw HOPE bars if the entity has feelings
-            const feelings = world.getComponent(entity, Feeling);
-            if (feelings) {
-                this.renderFeelingBars(this.ctx, drawX, drawY, renderable.width, renderable.height, feelings);
-            }
+        for (let i = 0; i < entities.length; i++) {
+            const ent = entities[i];
+            if (world.hasComponent(ent, Area)) areaEntities.push(ent);
+            else otherEntities.push(ent);
         }
+
+        const renderPass = (list, isAreaPass) => {
+            for (const entity of list) {
+                const pos = world.getComponent(entity, Position);
+                const renderable = world.getComponent(entity, Renderable);
+
+                // Frustum Culling
+                if (
+                    pos.x + renderable.width < vpLeft ||
+                    pos.x > vpRight ||
+                    pos.y + renderable.height < vpTop ||
+                    pos.y > vpBottom
+                ) {
+                    continue;
+                }
+
+                const drawX = pos.x - world.cameraX;
+                const drawY = pos.y - world.cameraY;
+
+                this.ctx.save();
+                this.ctx.fillStyle = renderable.color;
+
+                if (isAreaPass) {
+                    // Render area with a lighter touch / dashed border or overlay
+                    this.ctx.globalAlpha = 0.3;
+                    this.ctx.fillRect(drawX, drawY, renderable.width, renderable.height);
+                    
+                    // Draw name/label for area
+                    const area = world.getComponent(entity, Area);
+                    this.ctx.globalAlpha = 1.0;
+                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    this.ctx.font = '24px sans-serif';
+                    this.ctx.fillText(area.name.toUpperCase(), drawX + 10, drawY + 30);
+                } else {
+                    if (renderable.radius > 0) {
+                        this.ctx.beginPath();
+                        this.ctx.roundRect(drawX, drawY, renderable.width, renderable.height, renderable.radius);
+                        this.ctx.fill();
+                    } else {
+                        this.ctx.fillRect(drawX, drawY, renderable.width, renderable.height);
+                    }
+
+                    // Draw HOPE bars if the entity has feelings
+                    const feelings = world.getComponent(entity, Feeling);
+                    if (feelings) {
+                        this.renderFeelingBars(this.ctx, drawX, drawY, renderable.width, renderable.height, feelings);
+                    }
+                }
+                this.ctx.restore();
+            }
+        };
+
+        renderPass(areaEntities, true);
+        renderPass(otherEntities, false);
 
         this.ctx.restore();
     }
