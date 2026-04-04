@@ -182,9 +182,9 @@ export class CollisionSystem extends System {
                             const isOtherPlayer = !!world.getComponent(other, PlayerControl);
 
                             if (isEntityPlayer || isOtherPlayer) {
-                                console.log(`Dynamic Collision: Entity_${entity} (${FeelingSystem.encode(feelings1)}) hits Entity_${other} (${FeelingSystem.encode(feelings2)})`);
+                                //console.log(`Dynamic Collision: Entity_${entity} (${FeelingSystem.encode(feelings1)}) hits Entity_${other} (${FeelingSystem.encode(feelings2)})`);
                                 FeelingSystem.transferFeelings(feelings1, feelings2);
-                                console.log(`Result: Entity_${entity} (${FeelingSystem.encode(feelings1)}) | Entity_${other} (${FeelingSystem.encode(feelings2)})`);
+                                //console.log(`Result: Entity_${entity} (${FeelingSystem.encode(feelings1)}) | Entity_${other} (${FeelingSystem.encode(feelings2)})`);
                             } else {
                                 FeelingSystem.transferFeelings(feelings1, feelings2);
                             }
