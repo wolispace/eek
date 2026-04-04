@@ -55,11 +55,22 @@ export class BuffSystem extends System {
                 }
             }
 
-            // Update effective feelings based on base + all active buffs
+            // 3. Update effective feelings based on base + all active buffs
+            const prevH = feelings.happy;
+            const prevO = feelings.optimistic;
+            const prevP = feelings.peaceful;
+            const prevE = feelings.energetic;
+
             feelings.happy = Math.max(0, Math.min(8, h));
             feelings.optimistic = Math.max(0, Math.min(8, o));
             feelings.peaceful = Math.max(0, Math.min(8, p));
             feelings.energetic = Math.max(0, Math.min(8, e));
+
+            // If effective feelings changed (e.g., entered/left an area), reset decay timer
+            if (prevH !== feelings.happy || prevO !== feelings.optimistic || 
+                prevP !== feelings.peaceful || prevE !== feelings.energetic) {
+                feelings.decayTimer = 0;
+            }
         }
     }
 }

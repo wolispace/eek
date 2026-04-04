@@ -158,6 +158,10 @@ export class TradeSystem extends System {
         this.evaluateEffective(pFeelings, world.getComponent(this.activePlayer, Buff));
         this.evaluateEffective(tFeelings, world.getComponent(this.activeEntity, Buff));
         
+        // Reset decay timers as well
+        pFeelings.decayTimer = 0;
+        tFeelings.decayTimer = 0;
+
         this.render(world);
     }
 

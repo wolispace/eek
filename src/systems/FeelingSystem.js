@@ -24,27 +24,23 @@ export class FeelingSystem extends System {
     }
 
     update(world, deltaTime) {
-        this.decayAccumulator += deltaTime;
         const entitiesWithFeeling = world.query(Feeling);
-        const shouldDecay = this.decayAccumulator >= this.decayInterval;
 
         for (let i = 0; i < entitiesWithFeeling.length; i++) {
             const entity = entitiesWithFeeling[i];
             const feelings = world.getComponent(entity, Feeling);
 
-            // 1. Handle Universal Decay
-            if (shouldDecay) {
+            // 1. Handle Individual Decay
+            feelings.decayTimer += deltaTime;
+            if (feelings.decayTimer >= this.decayInterval) {
                 this.decayToDefault(feelings);
+                feelings.decayTimer = 0;
             }
 
             // 2. Update UI (only for player)
             if (world.getComponent(entity, PlayerControl)) {
                 this.updateUI(feelings);
             }
-        }
-
-        if (shouldDecay) {
-            this.decayAccumulator = 0;
         }
     }
 
@@ -84,6 +80,10 @@ export class FeelingSystem extends System {
             to[baseKey] += actual;
             from[baseKey] -= actual;
         });
+
+        // Reset decay timers on both entities because feelings were modified
+        from.decayTimer = 0;
+        to.decayTimer = 0;
     }
 
     updateUI(feelings) {
