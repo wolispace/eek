@@ -16,6 +16,11 @@ export class World {
         this.components = new Map();
         this.systems = [];
         this.isPaused = false;
+        
+        // Grid-based Areas
+        this.gridRows = 5;
+        this.gridCols = 5;
+        this.grid = new Array(this.gridRows * this.gridCols).fill(null);
     }
 
     createEntity() {

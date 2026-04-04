@@ -1,26 +1,20 @@
 import { System } from '../ecs.js';
 import { Feeling } from '../components/Feeling.js';
 import { Buff } from '../components/Buff.js';
-import { Area } from '../components/Area.js';
 import { Position } from '../components/Position.js';
-import { Renderable } from '../components/Renderable.js';
 
 export class BuffSystem extends System {
     update(world, deltaTime) {
-        const feelingEntities = world.query(Feeling);
-        const areas = world.query(Area, Position, Renderable);
+        const entities = world.query(Feeling, Position, Buff);
         
-        // Cache area data for better performance
-        const areaData = areas.map(ae => ({
-            comp: world.getComponent(ae, Area),
-            pos: world.getComponent(ae, Position),
-            ren: world.getComponent(ae, Renderable)
-        }));
-
-        for (let i = 0; i < feelingEntities.length; i++) {
-            const entity = feelingEntities[i];
+        const cellW = world.width / world.gridCols;
+        const cellH = world.height / world.gridRows;
+        
+        for (let i = 0; i < entities.length; i++) {
+            const entity = entities[i];
             const feelings = world.getComponent(entity, Feeling);
             const buffComp = world.getComponent(entity, Buff);
+            const pos = world.getComponent(entity, Position);
             
             // Start with base values
             let h = feelings.baseHappy;
@@ -28,30 +22,23 @@ export class BuffSystem extends System {
             let p = feelings.basePeaceful;
             let e = feelings.baseEnergetic;
 
-            // Only entities with Buff component and Position/Renderable can pick up area buffs
-            if (buffComp && world.hasComponent(entity, Position) && world.hasComponent(entity, Renderable)) {
-                const pos = world.getComponent(entity, Position);
-                const ren = world.getComponent(entity, Renderable);
+            buffComp.active = [];
 
-                buffComp.active = [];
+            // Get grid cell coordinates
+            const col = Math.floor(pos.x / cellW);
+            const row = Math.floor(pos.y / cellH);
 
-                for (let j = 0; j < areaData.length; j++) {
-                    const { comp, pos: aPos, ren: aRen } = areaData[j];
+            if (col >= 0 && col < world.gridCols && row >= 0 && row < world.gridRows) {
+                const gridIdx = row * world.gridCols + col;
+                const area = world.grid[gridIdx];
 
-                    // AABB overlap check
-                    if (
-                        pos.x < aPos.x + aRen.width &&
-                        pos.x + ren.width > aPos.x &&
-                        pos.y < aPos.y + aRen.height &&
-                        pos.y + ren.height > aPos.y
-                    ) {
-                        buffComp.active.push(comp);
-                        
-                        h += (comp.happy - 4);
-                        o += (comp.optimistic - 4);
-                        p += (comp.peaceful - 4);
-                        e += (comp.energetic - 4);
-                    }
+                if (area) {
+                    buffComp.active.push(area);
+                    
+                    h += (area.happy - 4);
+                    o += (area.optimistic - 4);
+                    p += (area.peaceful - 4);
+                    e += (area.energetic - 4);
                 }
             }
 

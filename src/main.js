@@ -16,7 +16,7 @@ import { FeelingSystem } from './systems/FeelingSystem.js';
 import { TradeSystem } from './systems/TradeSystem.js';
 import { createTradable } from './components/Tradable.js';
 import { Buff, createBuff } from './components/Buff.js';
-import { Area, createArea } from './components/Area.js';
+import { createArea } from './components/Area.js';
 import { BuffSystem } from './systems/BuffSystem.js';
 import { BOUNCER_CONFIGS, STATIC_CONFIGS, decodeHope } from './utils/EntityConfigs.js';
 
@@ -99,33 +99,27 @@ for (let i = 0; i < numBouncers; i++) spawnBouncer();
 const numStatics = 1000;
 for (let i = 0; i < numStatics; i++) spawnStatic();
 
-// Spawn Areas
-function spawnArea(x, y, w, h, name, color, feelings) {
-    const area = world.createEntity();
-    world.addComponent(area, Position, createPosition(x, y));
-    world.addComponent(area, Renderable, createRenderable(w, h, color));
-    const [fh, fo, fp, fe] = decodeHope(feelings);
-    world.addComponent(area, Area, createArea(fh, fo, fp, fe, name));
-}
-
+// Initialize Grid Areas
 const areaConfigs = [
-    { name: 'Calm Beach', color: '#1e90ff', hope: '5465', w: 800, h: 600 },
-    { name: 'Scary Forest', color: '#2f4f4f', hope: '3323', w: 1000, h: 800 },
-    { name: 'Sunny Meadow', color: '#90ee90', hope: '6556', w: 700, h: 500 },
-    { name: 'Crystal Cave', color: '#e0ffff', hope: '4574', w: 600, h: 1000 },
-    { name: 'Volcano', color: '#ff4500', hope: '2217', w: 900, h: 700 }
+    { name: 'Calm Beach', color: 'rgba(30, 144, 255, 0.3)', hope: '5465' },
+    { name: 'Scary Forest', color: 'rgba(47, 79, 79, 0.3)', hope: '3323' },
+    { name: 'Sunny Meadow', color: 'rgba(144, 238, 144, 0.3)', hope: '6556' },
+    { name: 'Crystal Cave', color: 'rgba(224, 255, 255, 0.3)', hope: '4574' },
+    { name: 'Volcano', color: 'rgba(255, 69, 0, 0.3)', hope: '2217' }
 ];
 
-const AREA_MIN_SIZE = 600;
-const AREA_MAX_SIZE = 1200;
-
-for (let i = 0; i < 20; i++) {
-    const config = areaConfigs[Math.floor(Math.random() * areaConfigs.length)];
-    const w = AREA_MIN_SIZE + Math.random() * (AREA_MAX_SIZE - AREA_MIN_SIZE);
-    const h = AREA_MIN_SIZE + Math.random() * (AREA_MAX_SIZE - AREA_MIN_SIZE);
-    const x = Math.random() * (worldX - w);
-    const y = Math.random() * (worldY - h);
-    spawnArea(x, y, w, h, config.name, config.color, config.hope);
+// Fill random grid cells with areas
+for (let i = 0; i < world.grid.length; i++) {
+    // 30% chance for a cell to have an area
+    if (Math.random() < 0.3) {
+        const config = areaConfigs[Math.floor(Math.random() * areaConfigs.length)];
+        const [fh, fo, fp, fe] = decodeHope(config.hope);
+        world.grid[i] = {
+            ...createArea(fh, fo, fp, fe, config.name),
+            color: config.color,
+            hopeStr: config.hope
+        };
+    }
 }
 
 // +/- key controls
