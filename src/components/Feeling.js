@@ -11,7 +11,8 @@ export function createFeeling(happy = 4, optimistic = 4, peaceful = 4, energetic
         baseHappy: Math.min(8, Math.max(0, happy)),
         baseOptimistic: Math.min(8, Math.max(0, optimistic)),
         basePeaceful: Math.min(8, Math.max(0, peaceful)),
-        baseEnergetic: Math.min(8, Math.max(0, energetic))
+        baseEnergetic: Math.min(8, Math.max(0, energetic)),
+        decayTimer: 0
     };
     // The 'default' state that this entity decays toward
     f.default = {
