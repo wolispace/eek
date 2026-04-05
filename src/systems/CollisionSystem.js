@@ -94,14 +94,24 @@ export class CollisionSystem extends System {
 
                         // If it's a gate, check if the mover can pass
                         if (gate && feelings1) {
-                            const canPass = feelings1.happy >= gate.happy &&
-                                            feelings1.optimistic >= gate.optimistic &&
-                                            feelings1.peaceful >= gate.peaceful &&
-                                            feelings1.energetic >= gate.energetic;
+                            const currentH = Math.floor(feelings1.happy);
+                            const currentO = Math.floor(feelings1.optimistic);
+                            const currentP = Math.floor(feelings1.peaceful);
+                            const currentE = Math.floor(feelings1.energetic);
+
+                            const canPass = currentH >= gate.happy &&
+                                            currentO >= gate.optimistic &&
+                                            currentP >= gate.peaceful &&
+                                            currentE >= gate.energetic;
                             
                             if (canPass) {
                                 // PASS THROUGH (skip all collision logic)
                                 continue;
+                            } else {
+                                // BLOCKED - Debug Log (Limiting spam)
+                                if (isPlayer && !collidable1.activeInteractions.has(other)) {
+                                    console.log(`[GATE BLOCKED] Req: ${gate.hopeStr} | Have: ${currentH}${currentO}${currentP}${currentE}`);
+                                }
                             }
                         }
 
