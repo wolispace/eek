@@ -7,6 +7,7 @@ import { PlayerControl } from '../components/PlayerControl.js';
 import { Feeling } from '../components/Feeling.js';
 import { Interaction } from '../components/Interaction.js';
 import { Tradable } from '../components/Tradable.js';
+import { Gate } from '../components/Gate.js';
 import { FeelingSystem } from './FeelingSystem.js';
 import { SpatialHashGrid } from '../utils/SpatialHashGrid.js';
 
@@ -88,8 +89,23 @@ export class CollisionSystem extends System {
                     const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
 
                     if (isOtherStatic) {
-                        // All collisions with statics trigger feeling transfer if both have feelings
                         const feelings1 = world.getComponent(entity, Feeling);
+                        const gate = world.getComponent(other, Gate);
+
+                        // If it's a gate, check if the mover can pass
+                        if (gate && feelings1) {
+                            const canPass = feelings1.happy >= gate.happy &&
+                                            feelings1.optimistic >= gate.optimistic &&
+                                            feelings1.peaceful >= gate.peaceful &&
+                                            feelings1.energetic >= gate.energetic;
+                            
+                            if (canPass) {
+                                // PASS THROUGH (skip all collision logic)
+                                continue;
+                            }
+                        }
+
+                        // All collisions with non-gate statics trigger feeling transfer if both have feelings
                         const feelings2 = world.getComponent(other, Feeling);
                         const isTradable = world.hasComponent(other, Tradable);
 

@@ -2,6 +2,7 @@ import { System } from '../ecs.js';
 import { Position } from '../components/Position.js';
 import { Renderable } from '../components/Renderable.js';
 import { Feeling } from '../components/Feeling.js';
+import { Gate } from '../components/Gate.js';
 import { FEELING_CONFIG } from '../utils/FeelingColors.js';
 
 export class RenderSystem extends System {
@@ -135,6 +136,17 @@ export class RenderSystem extends System {
             if (feelings) {
                 this.renderFeelingBars(this.ctx, drawX, drawY, renderable.width, renderable.height, feelings);
             }
+
+            // Draw Gate Requirement
+            const gate = world.getComponent(entity, Gate);
+            if (gate) {
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                this.ctx.font = 'bold 24px sans-serif';
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillText(gate.hopeStr, drawX + renderable.width/2, drawY + renderable.height/2);
+            }
+            
             this.ctx.restore();
         }
 

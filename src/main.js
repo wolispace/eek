@@ -17,6 +17,7 @@ import { TradeSystem } from './systems/TradeSystem.js';
 import { createTradable } from './components/Tradable.js';
 import { Buff, createBuff } from './components/Buff.js';
 import { createArea } from './components/Area.js';
+import { Gate, createGate } from './components/Gate.js';
 import { BuffSystem } from './systems/BuffSystem.js';
 import { BOUNCER_CONFIGS, STATIC_CONFIGS, decodeHope } from './utils/EntityConfigs.js';
 
@@ -76,7 +77,7 @@ function spawnStatic() {
     const entity = world.createEntity();
     const x = Math.random() * worldX;
     const y = Math.random() * worldY;
-    
+
     const config = STATIC_CONFIGS[Math.floor(Math.random() * STATIC_CONFIGS.length)];
     const color = config.color;
     const size = 15 + Math.random() * 45;
@@ -108,17 +109,86 @@ const areaConfigs = [
     { name: 'Volcano', color: 'rgba(255, 69, 0, 0.3)', hope: '2217' }
 ];
 
+const WALL_THICKNESS = 80;
+const GATE_SIZE = 80;
+
+function createWallEntity(x, y, w, h) {
+    const wall = world.createEntity();
+    world.addComponent(wall, Position, createPosition(x, y));
+    world.addComponent(wall, Renderable, createRenderable(w, h, '#4b5563')); // Slate grey
+    world.addComponent(wall, Collidable, createCollidable());
+}
+
+function createGateEntity(x, y, w, h, hreq, oreq, preq, ereq) {
+    const gate = world.createEntity();
+    world.addComponent(gate, Position, createPosition(x, y));
+    world.addComponent(gate, Renderable, createRenderable(w, h, 'rgba(255, 255, 255, 0.1)')); // Subtle glass effect
+    world.addComponent(gate, Collidable, createCollidable());
+    world.addComponent(gate, Gate, createGate(hreq, oreq, preq, ereq));
+}
+
+function spawnWallSegment(x1, y1, x2, y2) {
+    const isHorizontal = y1 === y2;
+    const length = isHorizontal ? Math.abs(x2 - x1) : Math.abs(y2 - y1);
+
+    // Entrance must be at least 2 player widths (80) from ends.
+    // Gate is 80 wide.
+    const minPos = 160;
+    const maxPos = length - 160 - GATE_SIZE;
+    const gateStart = minPos + Math.random() * (maxPos - minPos);
+
+    // Random HOPE requirement for the wall (one stat 5-7, others 4)
+    const reqs = [0, 0, 0, 0];
+    reqs[Math.floor(Math.random() * 4)] = 2 + Math.floor(Math.random() * 4);
+    const [gh, go, gp, ge] = reqs;
+
+    if (isHorizontal) {
+        // Piece 1
+        createWallEntity(x1, y1 - WALL_THICKNESS / 2, gateStart, WALL_THICKNESS);
+        // Gate
+        createGateEntity(x1 + gateStart, y1 - WALL_THICKNESS / 2, GATE_SIZE, WALL_THICKNESS, gh, go, gp, ge);
+        // Piece 2
+        createWallEntity(x1 + gateStart + GATE_SIZE, y1 - WALL_THICKNESS / 2, length - gateStart - GATE_SIZE, WALL_THICKNESS);
+    } else {
+        // Piece 1
+        createWallEntity(x1 - WALL_THICKNESS / 2, y1, WALL_THICKNESS, gateStart);
+        // Gate
+        createGateEntity(x1 - WALL_THICKNESS / 2, y1 + gateStart, WALL_THICKNESS, GATE_SIZE, gh, go, gp, ge);
+        // Piece 2
+        createWallEntity(x1 - WALL_THICKNESS / 2, y1 + gateStart + GATE_SIZE, WALL_THICKNESS, length - gateStart - GATE_SIZE);
+    }
+}
+
+const cellW = worldX / world.gridCols;
+const cellH = worldY / world.gridRows;
+
 // Fill random grid cells with areas
-for (let i = 0; i < world.grid.length; i++) {
-    // 30% chance for a cell to have an area
-    if (Math.random() < 0.3) {
-        const config = areaConfigs[Math.floor(Math.random() * areaConfigs.length)];
-        const [fh, fo, fp, fe] = decodeHope(config.hope);
-        world.grid[i] = {
-            ...createArea(fh, fo, fp, fe, config.name),
-            color: config.color,
-            hopeStr: config.hope
-        };
+for (let r = 0; r < world.gridRows; r++) {
+    for (let c = 0; c < world.gridCols; c++) {
+        const i = r * world.gridCols + c;
+        // 30% chance for a cell to have an area
+        if (Math.random() < 0.3) {
+            const config = areaConfigs[Math.floor(Math.random() * areaConfigs.length)];
+            const [fh, fo, fp, fe] = decodeHope(config.hope);
+            world.grid[i] = {
+                ...createArea(fh, fo, fp, fe, config.name),
+                color: config.color,
+                hopeStr: config.hope
+            };
+
+            // Create walls around this area
+            const x = c * cellW;
+            const y = r * cellH;
+
+            // Top
+            if (r > 0) spawnWallSegment(x, y, x + cellW, y);
+            // Bottom
+            if (r < world.gridRows - 1) spawnWallSegment(x, y + cellH, x + cellW, y + cellH);
+            // Left
+            if (c > 0) spawnWallSegment(x, y, x, y + cellH);
+            // Right
+            if (c < world.gridCols - 1) spawnWallSegment(x + cellW, y, x + cellW, y + cellH);
+        }
     }
 }
 

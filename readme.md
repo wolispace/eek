@@ -91,13 +91,24 @@ So buffs are attached to other entities, disconnect the entry from the player th
 We do not need random entities (rings, hats etc..) just yet, we will only use areas as the way for adding a buff for now.
 
 ## Areas
-Areas are large rectangle static entities movable entities can move over and static entities are placed over.
-Areas can apply a buff eg a calming beach may increase happines, peace and energy by one = 5455.
+The world is divided into areas 5x5 grid, and each cell has a chance of being an area that applies a buff. eg a calming beach may increase happines, peace and energy by one = 5455.
 
 The areas buff is applied and removed when the moving entity (player or bouncer  etc..) is over the area or not, like other stackable buffs.
 
-The min/max width/height of the randome area rectangles should be from easily modified constants.
+## Walls
+Areas (not every cell in the grid) are surrounded by rectangular walls on all 4 side (unless at the edge of the world).
 
+Each wall has one entrance that is a gap in the wall that is twice the size of the playet so easy to get thought.
+
+The position of the entrance will be random along the length of the wall, no more than 2 player widths from either end
+
+To cross the wall via the entrance a specific valie of HOPE muct be met or exceeded.
+
+A wall with requirement to pass of 6444 would allow entties through that are 6 or more happy, and 4 or more for the others.
+
+This number should be shown on the wallm, in the same way the areas are named and show their HOPE values.
+
+The walls will ultimatly be like inpassable dense forests or pile of immovable stones so they should be about 2 player widths thick.  
 
 
 
