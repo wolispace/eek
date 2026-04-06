@@ -73,12 +73,19 @@ function spawnBouncer() {
     bouncerIds.push(bouncer);
 }
 
-function spawnStatic() {
+function spawnStatic(isTradable = false, bx = null, by = null, bw = null, bh = null) {
     const entity = world.createEntity();
-    const x = Math.random() * worldX;
-    const y = Math.random() * worldY;
+    let x, y;
+    if (bx !== null && by !== null && bw !== null && bh !== null) {
+        x = bx + Math.random() * bw;
+        y = by + Math.random() * bh;
+    } else {
+        x = Math.random() * worldX;
+        y = Math.random() * worldY;
+    }
 
-    const config = STATIC_CONFIGS[Math.floor(Math.random() * STATIC_CONFIGS.length)];
+    const configs = STATIC_CONFIGS.filter(c => !!c.tradable === isTradable);
+    const config = configs[Math.floor(Math.random() * configs.length)];
     const color = config.color;
     const size = 15 + Math.random() * 45;
     world.addComponent(entity, Position, createPosition(x, y));
@@ -98,7 +105,7 @@ const numBouncers = 500;
 for (let i = 0; i < numBouncers; i++) spawnBouncer();
 
 const numStatics = 1000;
-for (let i = 0; i < numStatics; i++) spawnStatic();
+for (let i = 0; i < numStatics; i++) spawnStatic(false);
 
 // Initialize Grid Areas
 const areaConfigs = [
@@ -166,6 +173,15 @@ const cellH = worldY / world.gridRows;
 for (let r = 0; r < world.gridRows; r++) {
     for (let c = 0; c < world.gridCols; c++) {
         const i = r * world.gridCols + c;
+        
+        // Spawn exactly one tradable entity randomly within this grid cell
+        const margin = 100;
+        const bx = c * cellW + margin;
+        const by = r * cellH + margin;
+        const bw = cellW - margin * 2;
+        const bh = cellH - margin * 2;
+        spawnStatic(true, bx, by, bw, bh);
+
         // 30% chance for a cell to have an area
         if (Math.random() < 0.3) {
             const config = areaConfigs[Math.floor(Math.random() * areaConfigs.length)];
