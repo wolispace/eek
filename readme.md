@@ -58,23 +58,38 @@ Energetic  [###-+----] (2) <i class="fa-solid fa-bolt-lightning"></i>
 
 HOPE.
 
-A frog is HOPE=4441, It has no energy.
-When you bump into it you only xfer your emoptions to make then nutral 4444.
+Every entity has a defautt HOPE, the player is 4444. Negative things like flying rocks can be 1144. Positive things like trees can be 5564.
 
-So your HOPE=7246. So the frog is now up to 4443, one more to go.
-You are down to 7244.  Do you dip down to 7243 and you give as much energy as you can to the frog. I think so. The Frog is now 4444 and the quest is complete. You are now down to 7243.
+Bumping into another entity will auto-trade feelings. +1 if the stat is > 4, -1 if the stat is < 4.
 
-If everything you bump into, you give as much as you can to make the nutral 4444. Anything bumping into you does the same.
+So if the player is 6244 and bump into a tree 5654, we calculate the impact of each:
+H player 6 is +2 so tree 5 is 5 + 1 = 6
+O player 2 is -2 so tree 6 is 6 - 1 = 5
+P player 4 is 0 so tree 5 is 5 + 0 = 5
+E player 4 is 0 so tree 4 is 4 + 0 = 4
 
-but what if a flying rock of 1144 bumps into you? Your 7243 becomes 4044. The rocks H=1 is -3 from nutral 4. So we add 7 -3 = 4.
+And for the player, using the initial values 6244 and 5654:
+H tree is 5 is +1 so player 6 is 6 + 1 = 7
+O tree is 6 is +2 so player 2 is 2 + 1 = 3
+P tree is 5 is +1 so player 4 is 4 + 1 = 5
+E tree is 4 is 0 so player 4 is 4 + 0 = 4
 
-Does this mean the rock becomes H=4? Yes, we are making the rock nutral.
+So the player is now 7354 and the tree is 6554.
 
-If a Bunny bumps into you and its 8448, You become 8448. The bunny becomes 4444.
+Another example: player is 2222 and bumps into a rock 2345.
+H player 2 is -2 so rock 2 is 2 - 1 = 1
+O player 2 is -2 so rock 3 is 3 - 1 = 2
+P player 2 is -2 so rock 4 is 4 - 1 = 3
+E player 2 is -2 so rock 5 is 5 - 1 = 4
 
-So it is always a two-way interaction, bumping into something simply xfers between the two, does not matter which bumps first.
+And for the player, using the initial values 2222 and 2345:
+H rock is 2 is -2 so player 2 is 2 - 1 = 1
+O rock is 3 is -1 so player 2 is 2 - 1 = 1
+P rock is 4 is 0 so player 2 is 2 + 0 = 2
+E rock is 5 is +1 so player 2 is 2 + 1 = 3
 
-This then raises the question of a default HOPE eg 1144 for a flying rock, and it will, over time, deckay to its default.
+So the player is now 1123 and the rock is 1234.
+
 
 ## Buffs
 Each entrity can have zero, one or more buffs applied to their feelings

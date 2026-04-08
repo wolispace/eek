@@ -59,31 +59,34 @@ export class FeelingSystem extends System {
         return `${feelings.baseHappy}${feelings.baseOptimistic}${feelings.basePeaceful}${feelings.baseEnergetic}`;
     }
 
-    static transferFeelings(from, to) {
+    static transferFeelings(feelings1, feelings2) {
         const keys = ['happy', 'optimistic', 'peaceful', 'energetic'];
+        
+        // Cache initial states so both are calculated from the same baseline
+        const initial1 = {};
+        const initial2 = {};
+        
         keys.forEach(key => {
             const baseKey = 'base' + key.charAt(0).toUpperCase() + key.slice(1);
-            let needed = 4 - to[baseKey];
-            if (needed === 0) return;
+            initial1[baseKey] = feelings1[baseKey];
+            initial2[baseKey] = feelings2[baseKey];
+        });
 
-            let actual = 0;
-            if (needed > 0) {
-                // 'to' needs positive energy (it's low)
-                // 'from' gives up to all it has (down to 0)
-                actual = Math.min(needed, from[baseKey]);
-            } else {
-                // 'to' needs to lose energy (it's high)
-                // 'from' takes up to its capacity (up to 8)
-                actual = -Math.min(Math.abs(needed), 8 - from[baseKey]);
-            }
+        keys.forEach(key => {
+            const baseKey = 'base' + key.charAt(0).toUpperCase() + key.slice(1);
+            
+            // +1 if > 4, -1 if < 4, 0 if = 4
+            const impactOn2 = Math.sign(initial1[baseKey] - 4);
+            const impactOn1 = Math.sign(initial2[baseKey] - 4);
 
-            to[baseKey] += actual;
-            from[baseKey] -= actual;
+            // Apply impact and restrict to range 0-8
+            feelings1[baseKey] = Math.max(0, Math.min(8, initial1[baseKey] + impactOn1));
+            feelings2[baseKey] = Math.max(0, Math.min(8, initial2[baseKey] + impactOn2));
         });
 
         // Reset decay timers on both entities because feelings were modified
-        from.decayTimer = 0;
-        to.decayTimer = 0;
+        feelings1.decayTimer = 0;
+        feelings2.decayTimer = 0;
     }
 
     updateUI(feelings) {
