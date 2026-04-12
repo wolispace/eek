@@ -95,6 +95,7 @@ function spawnStatic(isTradable = false, bx = null, by = null, bw = null, bh = n
     // Apply curated HOPE values
     const [h, o, p, e] = decodeHope(config.hope);
     world.addComponent(entity, Feeling, createFeeling(h, o, p, e));
+    world.addComponent(entity, Buff, createBuff());
 
     if (config.tradable) {
         world.addComponent(entity, 'Tradable', createTradable());
