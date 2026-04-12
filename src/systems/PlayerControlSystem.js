@@ -65,21 +65,41 @@ export class PlayerControlSystem extends System {
             if (this.pointer.active) {
                 const playerX = pos.x + ren.width / 2;
                 const playerY = pos.y + ren.height / 2;
-                
+
                 const targetX = (this.pointer.x / world.cameraZoom) + world.cameraX;
                 const targetY = (this.pointer.y / world.cameraZoom) + world.cameraY;
                 
                 const dx = targetX - playerX;
                 const dy = targetY - playerY;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                
-                // A buffer radius that stops the player before they reach exactly under the pointer. 
-                // Tinker with this variable to adjust how far away the player stops from the touch point!
-                const TARGET_BUFFER_RADIUS = 60; 
-                
-                if (dist > TARGET_BUFFER_RADIUS) {
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                // A buffer radius that acts as a virtual joystick boundary.
+                // Tinker with this variable to adjust the joystick radius!
+                const TARGET_BUFFER_RADIUS = 120;
+
+                // Stop only if we are perfectly on top to prevent shivering
+                if (dist > 5) {
                     inputDx += dx / dist;
                     inputDy += dy / dist;
+
+                    // If the player tries to cross into the buffer zone, 
+                    // we push the target away by scrolling the camera!
+                    if (dist < TARGET_BUFFER_RADIUS) {
+                        const overlap = TARGET_BUFFER_RADIUS - dist;
+                        // Push slightly faster than the player to smoothly expand the joystick ring
+                        const maxPush = control.maxSpeed * deltaTime * 1.2;
+                        const actualPush = Math.min(overlap, maxPush);
+
+                        world.cameraX += (dx / dist) * actualPush;
+                        world.cameraY += (dy / dist) * actualPush;
+
+                        // Don't scroll past the edge of the game world!
+                        // If it hits the edge, the target stops running away, and the player can finally catch up!
+                        const visW = window.innerWidth  / world.cameraZoom;
+                        const visH = window.innerHeight / world.cameraZoom;
+                        world.cameraX = Math.max(0, Math.min(world.cameraX, world.width  - visW));
+                        world.cameraY = Math.max(0, Math.min(world.cameraY, world.height - visH));
+                    }
                 }
             }
 
