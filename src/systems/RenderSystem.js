@@ -43,6 +43,50 @@ export class RenderSystem extends System {
             world.cameraX = worldX - mouseX / newZoom;
             world.cameraY = worldY - mouseY / newZoom;
         }, { passive: false });
+
+        // Mobile pinch zoom
+        let initialPinchDist = null;
+
+        this.canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                initialPinchDist = Math.sqrt(dx * dx + dy * dy);
+            }
+        });
+
+        this.canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2 && initialPinchDist !== null) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const currentDist = Math.sqrt(dx * dx + dy * dy);
+                
+                const zoomFactor = currentDist / initialPinchDist;
+                initialPinchDist = currentDist; 
+
+                const newZoom = Math.max(
+                    world.minZoom,
+                    Math.min(world.maxZoom, world.cameraZoom * zoomFactor)
+                );
+
+                // Zoom toward the center point of the two fingers
+                const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+                const worldX = (centerX / world.cameraZoom) + world.cameraX;
+                const worldY = (centerY / world.cameraZoom) + world.cameraY;
+
+                world.cameraZoom = newZoom;
+                world.cameraX = worldX - centerX / newZoom;
+                world.cameraY = worldY - centerY / newZoom;
+            }
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) {
+                initialPinchDist = null;
+            }
+        });
     }
 
     update(world, deltaTime) {
