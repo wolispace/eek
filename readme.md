@@ -125,7 +125,10 @@ This number should be shown on the wallm, in the same way the areas are named an
 
 The walls will ultimatly be like inpassable dense forests or pile of immovable stones so they should be about 2 player widths thick.  
 
+## Movement
+I think the touch controls are a bit slippery on mobile, so ples add yet nother form of input that is a semi-transparent joystick (bottom left) that consistes of a stick (circle) within a larger circle and depending on how far you mive the stick from the centre dictates velocity, and the direction dictates the movement vector.
 
+It should be configurable so I can easiy turn it on or off in code for now.
 
 
 
